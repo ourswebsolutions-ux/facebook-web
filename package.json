@@ -1,8 +1,8 @@
 {
-  "name": "whatsapp-automated",
+  "name": "facebook-automated",
   "version": "1.1.2",
   "type": "module",
-  "description": "Production-ready WhatsApp bulk messaging desktop application",
+  "description": "Production-ready Facebook automation desktop application",
   "main": "electron/main/index.js",
   "author": {
     "name": "Ali Hama",
@@ -51,8 +51,8 @@
     "wait-on": "^7.2.0"
   },
   "build": {
-    "appId": "com.whatsapp.sender",
-    "productName": "WhatsApp Automated",
+    "appId": "com.facebook.automation",
+    "productName": "Facebook Automation",
     "directories": {
       "output": "dist-electron"
     },
