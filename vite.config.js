@@ -26,7 +26,7 @@ export default defineConfig({
         ws: true,
       },
       '/health': {
-        target: 'http://127.0.0.1:8000',
+        target: 'https://pylister.axorawebsolutions.com',
         changeOrigin: true,
         secure: false,
       },
