@@ -20,7 +20,7 @@ export default defineConfig({
     proxy: {
       // Proxy API requests to the backend to avoid CORS in development
       '/api': {
-        target: 'http://127.0.0.1:8000',
+        target: 'https://pylister.axorawebsolutions.com',
         changeOrigin: true,
         secure: false,
         ws: true,
