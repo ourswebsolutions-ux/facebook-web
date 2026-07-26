@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // ── Base URL management ──────────────────────────────────────────────────────
 // Force empty base URL for development to use Vite proxy
-let baseUrl = ''
+let baseUrl = 'https://pylister.axorawebsolutions.com'
 
 export function getBaseUrl() {
   return baseUrl
