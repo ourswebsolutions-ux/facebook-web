@@ -83,6 +83,7 @@ export default function InboxView() {
   const [error, setError] = useState('')
   const [selectedId, setSelectedId] = useState(null)
   const [replyText, setReplyText] = useState('')
+  const [sendingReply, setSendingReply] = useState(false)
   const [actionMessage, setActionMessage] = useState('')
   const [deletingId, setDeletingId] = useState(null)
   const [selectedAccountId, setSelectedAccountId] = useState('')
@@ -235,13 +236,13 @@ export default function InboxView() {
       setActionMessage('Please add an account first in Accounts view.')
       return
     }
-    
+
     const selectedAccount = accounts.find(acc => acc.id === targetAccountId)
     if (!selectedAccount?.cookies) {
       setActionMessage('⚠️ Account is not verified. Please verify the account first in Accounts view.')
       return
     }
-    
+
     setTaskBusy(true)
     setTask(null)
     setTaskLogs([])
@@ -264,13 +265,13 @@ export default function InboxView() {
       setActionMessage('Please add an account first in Accounts view.')
       return
     }
-    
+
     const selectedAccount = accounts.find(acc => acc.id === targetAccountId)
     if (!selectedAccount?.cookies) {
       setActionMessage('⚠️ Account is not verified. Please verify the account first in Accounts view.')
       return
     }
-    
+
     setTaskBusy(true)
     setTask(null)
     setTaskLogs([])
@@ -314,13 +315,22 @@ export default function InboxView() {
       setActionMessage('Enter a reply before sending.')
       return
     }
+    setSendingReply(true)
     setActionMessage('Sending manual reply…')
     try {
       const result = await api.replyInboxMessage(selectedId, { reply_text: replyText })
-      setActionMessage(`Reply ${result.reply_status === 'sent' ? 'sent successfully' : 'failed to send'}.`)
-      setReplyText('')
+      if (result?.success) {
+        setActionMessage('✅ Reply sent successfully')
+        setReplyText('')
+        // Refresh messages list to reflect status change
+        await loadMessages()
+      } else {
+        setActionMessage(result?.message || 'Reply failed')
+      }
     } catch (err) {
       setActionMessage(err?.response?.data?.detail || 'Reply failed')
+    } finally {
+      setSendingReply(false)
     }
   }
 
@@ -364,9 +374,9 @@ export default function InboxView() {
             <button type="button" className="btn-primary" onClick={readInbox} disabled={taskBusy}>
               {taskBusy ? 'Working…' : 'Read Inbox'}
             </button>
-            <button type="button" className="btn-primary" onClick={autoReply} disabled={taskBusy}>
+            {/* <button type="button" className="btn-primary" onClick={autoReply} disabled={taskBusy}>
               Auto Reply
-            </button>
+            </button> */}
           </div>
         </div>
 
@@ -468,7 +478,10 @@ export default function InboxView() {
                         <span className="text-sm text-white font-medium truncate">
                           {msg.sender_name || 'Unknown sender'}
                         </span>
-                        <StatusBadge status={msg.reply_status} />
+                        <div className="flex items-center gap-2">
+                          <StatusBadge status={msg.read_at ? 'read' : 'unread'} />
+                          <StatusBadge status={msg.reply_status} />
+                        </div>
                       </div>
                       <p className="text-xs text-slate-400 truncate mt-0.5">
                         {msg.message_text || 'No message content'}
@@ -498,8 +511,16 @@ export default function InboxView() {
               {selectedMessage ? (
                 <>
                   <div className="text-sm">
-                    <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">From</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">Sender</div>
                     <div className="text-white">{selectedMessage.sender_name || 'Unknown'}</div>
+                  </div>
+                  <div className="text-sm">
+                    <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">Time</div>
+                    <div className="text-slate-300">{selectedMessage.created_at ? new Date(selectedMessage.created_at).toLocaleString() : 'Unknown time'}</div>
+                  </div>
+                  <div className="text-sm">
+                    <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">Read Status</div>
+                    <div><StatusBadge status={selectedMessage.read_at ? 'read' : 'unread'} /></div>
                   </div>
                   <div className="text-sm">
                     <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">Message</div>
@@ -539,9 +560,9 @@ export default function InboxView() {
                 type="button"
                 className="btn-secondary w-full"
                 onClick={handleReply}
-                disabled={!selectedId}
+                disabled={!selectedId || sendingReply}
               >
-                Send Reply
+                {sendingReply ? 'Sending…' : 'Send Reply'}
               </button>
             </div>
           </div>

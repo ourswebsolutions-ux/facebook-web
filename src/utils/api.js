@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // ── Base URL management ──────────────────────────────────────────────────────
 // Force empty base URL for development to use Vite proxy
-let baseUrl = 'https://pylister.axorawebsolutions.com'
+let baseUrl = ''
 
 export function getBaseUrl() {
   return baseUrl
@@ -165,7 +165,9 @@ const api = {
   draftPublisherAI: (payload) => api.startAutomation('draft-publisher-ai', payload),
   deleteAllListings: (payload) => api.startAutomation('delete-all-listings', payload),
   draftPublisher: (payload) => api.startAutomation('draft-publisher', payload),
+  publishListing: (payload) => api.startAutomation('publish-listing', payload),
   draftDelete: (payload) => api.startAutomation('draft-delete', payload),
+  deleteListingAutomation: (payload) => api.startAutomation('delete-listing', payload),
   adsMultiplier: (payload) => api.startAutomation('ads-multiplier', payload),
   warmup: (payload) => api.startAutomation('warmup', payload),
   profileUpdater: (payload) => api.startAutomation('profile-updater', payload),

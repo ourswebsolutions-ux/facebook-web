@@ -45,8 +45,8 @@ export function ActionButtons({ actions = [], danger = false, onAction, disabled
       {busy ? (
         <>
           <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
           </svg>
           Working…
         </>
@@ -172,11 +172,10 @@ export function DropdownSelect({ options = [], value, onChange, placeholder = 'S
               <button
                 key={option.value}
                 type="button"
-                className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm text-left transition-colors ${
-                  isSelected
-                    ? 'bg-accent-red/15 text-red-400'
-                    : 'text-slate-200 hover:bg-white/8'
-                }`}
+                className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm text-left transition-colors ${isSelected
+                  ? 'bg-accent-red/15 text-red-400'
+                  : 'text-slate-200 hover:bg-white/8'
+                  }`}
                 onClick={() => { onChange?.(option.value); setOpen(false) }}
                 role="option"
                 aria-selected={isSelected}
@@ -197,10 +196,10 @@ export function DropdownSelect({ options = [], value, onChange, placeholder = 'S
 // ─────────────────────────────────────────────────────────────────────────────
 function StatusBadge({ status }) {
   const map = {
-    active:  'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
-    idle:    'bg-blue-500/15 text-blue-400 border-blue-500/20',
+    active: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
+    idle: 'bg-blue-500/15 text-blue-400 border-blue-500/20',
     warming: 'bg-amber-500/15 text-amber-400 border-amber-500/20',
-    banned:  'bg-red-500/15 text-red-400 border-red-500/20',
+    banned: 'bg-red-500/15 text-red-400 border-red-500/20',
   }
   const dot = {
     active: 'bg-emerald-400',
@@ -250,8 +249,8 @@ export function AccountSelector({ title = 'Select Account' }) {
       {loading ? (
         <div className="flex items-center gap-2 text-sm text-slate-500">
           <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
           </svg>
           Loading accounts…
         </div>
@@ -371,8 +370,8 @@ export function MultiAccountSelector({ title = 'Select Accounts' }) {
       {loading ? (
         <div className="flex items-center gap-2 text-sm text-slate-500">
           <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
           </svg>
           Loading…
         </div>
@@ -401,10 +400,9 @@ export function MultiAccountSelector({ title = 'Select Accounts' }) {
           {/* Select All row */}
           <label onClick={toggleAll} className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer border transition-all
             ${allSelected ? 'bg-accent-red/10 border-accent-red/30' : 'bg-white/3 border-white/8 hover:bg-white/6'}`}>
-            <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
-              allSelected ? 'bg-accent-red border-accent-red' : someSelected ? 'border-accent-red bg-accent-red/30' : 'border-white/30'
-            }`}>
-              {allSelected && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5"/></svg>}
+            <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-all ${allSelected ? 'bg-accent-red border-accent-red' : someSelected ? 'border-accent-red bg-accent-red/30' : 'border-white/30'
+              }`}>
+              {allSelected && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" /></svg>}
               {!allSelected && someSelected && <div className="w-2 h-0.5 bg-white rounded" />}
             </div>
             <span className="text-sm font-semibold text-white">
@@ -420,31 +418,29 @@ export function MultiAccountSelector({ title = 'Select Accounts' }) {
               <p className="text-xs text-slate-500 px-2 py-3">No accounts match "{search}"</p>
             ) : (
               filtered.map((acc) => {
-              const isSelected = selectedAccountIds.includes(acc.id)
-              return (
-                <label key={acc.id} onClick={() => toggle(acc.id)}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer border transition-all ${
-                    isSelected ? 'bg-accent-red/10 border-accent-red/25' : 'bg-transparent border-transparent hover:bg-white/4'
-                  }`}>
-                  {/* Checkbox */}
-                  <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
-                    isSelected ? 'bg-accent-red border-accent-red' : 'border-white/30'
-                  }`}>
-                    {isSelected && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5"/></svg>}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-white truncate">{acc.email || acc.phone}</div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <StatusBadge status={acc.status} />
-                      {acc.cookies
-                        ? <span className="text-[10px] text-emerald-400">✓ verified</span>
-                        : <span className="text-[10px] text-amber-400">⚠ unverified</span>
-                      }
+                const isSelected = selectedAccountIds.includes(acc.id)
+                return (
+                  <label key={acc.id} onClick={() => toggle(acc.id)}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer border transition-all ${isSelected ? 'bg-accent-red/10 border-accent-red/25' : 'bg-transparent border-transparent hover:bg-white/4'
+                      }`}>
+                    {/* Checkbox */}
+                    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-all ${isSelected ? 'bg-accent-red border-accent-red' : 'border-white/30'
+                      }`}>
+                      {isSelected && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" /></svg>}
                     </div>
-                  </div>
-                </label>
-              )
-            })
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-white truncate">{acc.email || acc.phone}</div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <StatusBadge status={acc.status} />
+                        {acc.cookies
+                          ? <span className="text-[10px] text-emerald-400">✓ verified</span>
+                          : <span className="text-[10px] text-amber-400">⚠ unverified</span>
+                        }
+                      </div>
+                    </div>
+                  </label>
+                )
+              })
             )}
           </div>
 
@@ -522,8 +518,8 @@ export function ImageUploader({ imagePaths = [], onChange, required = false, max
         {uploading ? (
           <div className="flex items-center gap-2 text-sm text-slate-400">
             <svg className="animate-spin h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
             </svg>
             Uploading…
           </div>
@@ -692,8 +688,8 @@ export function TaskProgressView({ task, busy, onCancel }) {
     return (
       <div className="rounded-xl border border-white/8 bg-white/3 p-4 flex items-center gap-3 text-sm text-slate-400">
         <svg className="animate-spin h-4 w-4 text-accent-red shrink-0" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
         </svg>
         Starting task…
       </div>
@@ -703,11 +699,11 @@ export function TaskProgressView({ task, busy, onCancel }) {
 
   const statusStyle = {
     completed: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20',
-    failed:    'text-red-400 bg-red-400/10 border-red-400/20',
+    failed: 'text-red-400 bg-red-400/10 border-red-400/20',
     cancelled: 'text-amber-400 bg-amber-400/10 border-amber-400/20',
-    running:   'text-blue-400 bg-blue-400/10 border-blue-400/20',
-    pending:   'text-slate-400 bg-slate-400/10 border-slate-400/20',
-    queued:    'text-slate-400 bg-slate-400/10 border-slate-400/20',
+    running: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
+    pending: 'text-slate-400 bg-slate-400/10 border-slate-400/20',
+    queued: 'text-slate-400 bg-slate-400/10 border-slate-400/20',
   }
   const barColor = task.status === 'completed' ? 'bg-emerald-400' : task.status === 'failed' ? 'bg-red-400' : 'bg-blue-400'
   const failedLogs = logs.filter(l => l.status === 'failed')
@@ -782,11 +778,10 @@ export function TaskProgressView({ task, busy, onCancel }) {
               {(failedLogs.length > 0 ? failedLogs : logs).map((log) => (
                 <div
                   key={log.id}
-                  className={`rounded-lg px-3 py-2 text-[11px] leading-relaxed border ${
-                    log.status === 'failed'
-                      ? 'bg-red-500/8 border-red-500/20 text-red-300'
-                      : 'bg-white/3 border-white/5 text-slate-400'
-                  }`}
+                  className={`rounded-lg px-3 py-2 text-[11px] leading-relaxed border ${log.status === 'failed'
+                    ? 'bg-red-500/8 border-red-500/20 text-red-300'
+                    : 'bg-white/3 border-white/5 text-slate-400'
+                    }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-0.5">
                     <span className="font-semibold text-slate-300">{log.action}</span>
@@ -865,35 +860,34 @@ export function AccountTable({ selectable = true, title = 'Facebook Accounts', o
       </div>
       <div className="space-y-1 max-h-64 overflow-y-auto -mx-1 px-1">
         {loading ? <p className="text-sm text-slate-500 py-2">Loading…</p>
-        : error ? <p className="text-sm text-amber-400 py-2">{error}</p>
-        : accounts.length === 0 ? <p className="text-sm text-slate-500 py-2">No accounts found.</p>
-        : accounts.map((acc) => {
-          const isSelected = selectedAccountIds[0] === acc.id
-          return (
-            <label key={acc.id}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all
+          : error ? <p className="text-sm text-amber-400 py-2">{error}</p>
+            : accounts.length === 0 ? <p className="text-sm text-slate-500 py-2">No accounts found.</p>
+              : accounts.map((acc) => {
+                const isSelected = selectedAccountIds[0] === acc.id
+                return (
+                  <label key={acc.id}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all
                 ${isSelected
-                  ? 'bg-accent-red/10 border border-accent-red/30 shadow-sm shadow-red-900/20'
-                  : 'hover:bg-white/4 border border-transparent'
-                }`}
-              onClick={() => selectable && select(acc.id)}
-            >
-              {selectable && (
-                /* Custom radio circle */
-                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                  isSelected ? 'border-accent-red bg-accent-red' : 'border-white/30'
-                }`}>
-                  {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-white truncate">{acc.email || acc.phone}</div>
-                <div className="text-[11px] text-slate-500 mt-0.5">Warmup {acc.warmup_level ?? 0}%</div>
-              </div>
-              <StatusBadge status={acc.status} />
-            </label>
-          )
-        })}
+                        ? 'bg-accent-red/10 border border-accent-red/30 shadow-sm shadow-red-900/20'
+                        : 'hover:bg-white/4 border border-transparent'
+                      }`}
+                    onClick={() => selectable && select(acc.id)}
+                  >
+                    {selectable && (
+                      /* Custom radio circle */
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${isSelected ? 'border-accent-red bg-accent-red' : 'border-white/30'
+                        }`}>
+                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-white truncate">{acc.email || acc.phone}</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">Warmup {acc.warmup_level ?? 0}%</div>
+                    </div>
+                    <StatusBadge status={acc.status} />
+                  </label>
+                )
+              })}
       </div>
     </SectionCard>
   )
@@ -910,9 +904,37 @@ export function ListingsTable({ title = 'Listings', selectable = false, selected
 
   const loadListings = useCallback(async () => {
     setError('')
-    try { const data = await api.getListings({ limit: 50 }); setListings(data) }
-    catch { setError('Unable to load listings.') }
-    finally { setLoading(false) }
+    try {
+      const data = await api.getListings({ limit: 50 })
+      const map = new Map()
+      const precedence = ['published', 'draft', 'expired', 'deleted']
+      const score = (s) => {
+        if (!s) return precedence.length
+        const idx = precedence.indexOf(s)
+        return idx === -1 ? precedence.length : idx
+      }
+        ; (data || []).forEach((item) => {
+          if (!item?.id) return
+          const id = String(item.id)
+          const existing = map.get(id)
+          if (!existing) { map.set(id, item); return }
+          const exScore = score(existing.status)
+          const newScore = score(item.status)
+          if (newScore < exScore) {
+            map.set(id, item)
+          } else if (newScore === exScore) {
+            const exTime = existing.updated_at ? new Date(existing.updated_at).getTime() : 0
+            const newTime = item.updated_at ? new Date(item.updated_at).getTime() : 0
+            if (newTime >= exTime) map.set(id, item)
+          }
+        })
+      const uniqueListings = Array.from(map.values())
+      setListings(uniqueListings)
+    } catch {
+      setError('Unable to load listings.')
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
   useEffect(() => { loadListings() }, [loadListings])
@@ -937,46 +959,45 @@ export function ListingsTable({ title = 'Listings', selectable = false, selected
   return (
     <SectionCard title={title} icon="📋">
       {loading ? <p className="text-sm text-slate-500">Loading listings…</p>
-      : error ? <p className="text-sm text-amber-400">{error}</p>
-      : listings.length === 0 ? <p className="text-sm text-slate-500">No listings found.</p>
-      : <div className="space-y-1.5 max-h-72 overflow-y-auto -mx-1 px-1">
-          {listings.map((item) => {
-            const isSelected = selectedIds.includes(item.id)
-            return (
-              <div key={item.id}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all border cursor-pointer
+        : error ? <p className="text-sm text-amber-400">{error}</p>
+          : listings.length === 0 ? <p className="text-sm text-slate-500">No listings found.</p>
+            : <div className="space-y-1.5 max-h-72 overflow-y-auto -mx-1 px-1">
+              {listings.map((item) => {
+                const isSelected = selectedIds.includes(item.id)
+                return (
+                  <div key={item.id}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all border cursor-pointer
                   ${isSelected
-                    ? 'bg-accent-red/10 border-accent-red/30'
-                    : 'hover:bg-white/4 border-transparent hover:border-white/5'
-                  }`}
-                onClick={() => selectable && handleSelect(item.id)}
-              >
-                {selectable && (
-                  /* Custom radio circle */
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                    isSelected ? 'border-accent-red bg-accent-red' : 'border-white/30'
-                  }`}>
-                    {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        ? 'bg-accent-red/10 border-accent-red/30'
+                        : 'hover:bg-white/4 border-transparent hover:border-white/5'
+                      }`}
+                    onClick={() => selectable && handleSelect(item.id)}
+                  >
+                    {selectable && (
+                      /* Custom radio circle */
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${isSelected ? 'border-accent-red bg-accent-red' : 'border-white/30'
+                        }`}>
+                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm text-white truncate">{item.title}</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">
+                        {item.price ? `$${(item.price / 100).toFixed(2)}` : 'No price'} · {item.category || 'No category'}
+                      </div>
+                    </div>
+                    <span className={`text-[11px] font-semibold ${statusColor[item.status] || 'text-slate-400'}`}>
+                      {item.status}
+                    </span>
+                    <button type="button" disabled={deletingId === item.id}
+                      className="text-[11px] text-slate-600 hover:text-red-400 transition-colors px-2 py-1 rounded-lg hover:bg-red-400/10"
+                      onClick={(e) => { e.stopPropagation(); handleDelete(item.id) }}>
+                      {deletingId === item.id ? '…' : 'Delete'}
+                    </button>
                   </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm text-white truncate">{item.title}</div>
-                  <div className="text-[11px] text-slate-500 mt-0.5">
-                    {item.price ? `$${(item.price / 100).toFixed(2)}` : 'No price'} · {item.category || 'No category'}
-                  </div>
-                </div>
-                <span className={`text-[11px] font-semibold ${statusColor[item.status] || 'text-slate-400'}`}>
-                  {item.status}
-                </span>
-                <button type="button" disabled={deletingId === item.id}
-                  className="text-[11px] text-slate-600 hover:text-red-400 transition-colors px-2 py-1 rounded-lg hover:bg-red-400/10"
-                  onClick={(e) => { e.stopPropagation(); handleDelete(item.id) }}>
-                  {deletingId === item.id ? '…' : 'Delete'}
-                </button>
-              </div>
-            )
-          })}
-        </div>
+                )
+              })}
+            </div>
       }
     </SectionCard>
   )

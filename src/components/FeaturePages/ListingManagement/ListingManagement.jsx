@@ -11,29 +11,29 @@ import Pagination from '../../shared/Pagination'
 const PAGE_SIZE = 10
 
 const FB_CATEGORIES = [
-  'Vehicles','Property Rentals','Apparel','Classifieds','Electronics',
-  'Entertainment','Family','Free Stuff','Garden & Outdoor','Hobbies',
-  'Home Goods','Home Improvement Supplies','Home Sales','Musical Instruments',
-  'Office Supplies','Pet Supplies','Sporting Goods','Toys & Games',
-  'Buy and sell groups','Other',
+  'Vehicles', 'Property Rentals', 'Apparel', 'Classifieds', 'Electronics',
+  'Entertainment', 'Family', 'Free Stuff', 'Garden & Outdoor', 'Hobbies',
+  'Home Goods', 'Home Improvement Supplies', 'Home Sales', 'Musical Instruments',
+  'Office Supplies', 'Pet Supplies', 'Sporting Goods', 'Toys & Games',
+  'Buy and sell groups', 'Other',
 ]
 
 const ACTION_MODES = [
-  { id: 'view',          label: 'View Only',          icon: '👁️' },
-  { id: 'renew',         label: 'Renew Listings',      icon: '🔄' },
-  { id: 'relist',        label: 'Relist Listings',     icon: '♻️' },
-  { id: 'delete-all',    label: 'Delete All Listings', icon: '🗑️' },
-  { id: 'delete-drafts', label: 'X Draft Delete',      icon: '🗂️' },
+  { id: 'view', label: 'View Only', icon: '👁️' },
+  { id: 'renew', label: 'Renew Listings', icon: '🔄' },
+  { id: 'relist', label: 'Relist Listings', icon: '♻️' },
+  { id: 'delete-all', label: 'Delete All Listings', icon: '🗑️' },
+  { id: 'delete-drafts', label: 'X Draft Delete', icon: '🗂️' },
 ]
 
 // ── Status badge ──────────────────────────────────────────────────────────────
 function StatusBadge({ status }) {
   const map = {
     published: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25',
-    draft:     'bg-blue-500/15 text-blue-400 border-blue-500/25',
-    expired:   'bg-amber-500/15 text-amber-400 border-amber-500/25',
-    deleted:   'bg-red-500/15 text-red-400 border-red-500/25',
-    relisted:  'bg-purple-500/15 text-purple-400 border-purple-500/25',
+    draft: 'bg-blue-500/15 text-blue-400 border-blue-500/25',
+    expired: 'bg-amber-500/15 text-amber-400 border-amber-500/25',
+    deleted: 'bg-red-500/15 text-red-400 border-red-500/25',
+    relisted: 'bg-purple-500/15 text-purple-400 border-purple-500/25',
   }
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border capitalize ${map[status] || 'bg-slate-500/15 text-slate-400 border-slate-500/25'}`}>
@@ -83,17 +83,17 @@ function ActionPanel({ mode, onDone }) {
   const { statusMessage, busy, task, runTask, cancelTask } = useAutomationTask()
 
   // renew / relist
-  const [listingIds, setListingIds]   = useState('')
-  const [maxCount, setMaxCount]       = useState(10)
+  const [listingIds, setListingIds] = useState('')
+  const [maxCount, setMaxCount] = useState(10)
   const [delaySeconds, setDelaySeconds] = useState(10)
   // delete
-  const [draftIds, setDraftIds]       = useState('')
-  const [maxDelete, setMaxDelete]     = useState(50)
+  const [draftIds, setDraftIds] = useState('')
+  const [maxDelete, setMaxDelete] = useState(50)
   const [statusFilter, setStatusFilter] = useState('')
   const [confirmInput, setConfirmInput] = useState('')
 
   const accountId = selectedAccountIds?.[0]
-  const isDanger  = ['delete-all','delete-drafts'].includes(mode)
+  const isDanger = ['delete-all', 'delete-drafts'].includes(mode)
 
   const canRun = (() => {
     if (!accountId) return false
@@ -140,7 +140,7 @@ function ActionPanel({ mode, onDone }) {
       <AccountSelector />
 
       {/* Renew / Relist config */}
-      {['renew','relist'].includes(mode) && (
+      {['renew', 'relist'].includes(mode) && (
         <ConfigPanel title={mode === 'renew' ? 'Renew Settings' : 'Relist Settings'} icon={mode === 'renew' ? '🔄' : '♻️'}>
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
@@ -202,13 +202,12 @@ function ActionPanel({ mode, onDone }) {
 
       {/* Run button */}
       <button type="button" disabled={busy || !canRun} onClick={handleRun}
-        className={`w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-          isDanger
-            ? 'bg-red-700/90 text-white hover:bg-red-700 border border-red-600/40 disabled:opacity-40'
-            : 'bg-accent-red text-white hover:bg-red-500 shadow shadow-red-900/40 disabled:opacity-40'
-        }`}>
+        className={`w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${isDanger
+          ? 'bg-red-700/90 text-white hover:bg-red-700 border border-red-600/40 disabled:opacity-40'
+          : 'bg-accent-red text-white hover:bg-red-500 shadow shadow-red-900/40 disabled:opacity-40'
+          }`}>
         {busy
-          ? <><svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Working…</>
+          ? <><svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>Working…</>
           : ACTION_MODES.find((m) => m.id === mode)?.label || 'Run'
         }
       </button>
@@ -228,35 +227,69 @@ function ActionPanel({ mode, onDone }) {
 export default function ListingManagement() {
   const selectedAccountIds = useAppStore((s) => s.selectedAccountIds)
   const accountId = selectedAccountIds?.[0]
+  const { task, runTask } = useAutomationTask()
 
-  const [listings, setListings]         = useState([])
-  const [loading, setLoading]           = useState(true)
-  const [page, setPage]                 = useState(1)
-  const [tabFilter, setTabFilter]       = useState('all')
-  const [search, setSearch]             = useState('')
-  const [sortBy, setSortBy]             = useState('newest')
+  const [listings, setListings] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const [tabFilter, setTabFilter] = useState('all')
+  const [search, setSearch] = useState('')
+  const [sortBy, setSortBy] = useState('newest')
   const [deleteTarget, setDeleteTarget] = useState(null)
-  const [deleting, setDeleting]         = useState(false)
-  const [actionMode, setActionMode]     = useState('view')
-  const [showPanel, setShowPanel]       = useState(false)
-  const [stats, setStats]               = useState({ total: 0, published: 0, draft: 0, expired: 0 })
+  const [deleting, setDeleting] = useState(false)
+  const [actionMode, setActionMode] = useState('view')
+  const [showPanel, setShowPanel] = useState(false)
+  const [stats, setStats] = useState({ total: 0, published: 0, draft: 0, expired: 0 })
+  // Independent Listing Management account filter (local state)
+  const [managementAccountId, setManagementAccountId] = useState('') // '' == All Accounts
+  const [verifiedAccounts, setVerifiedAccounts] = useState([])
+  const [accountsLoading, setAccountsLoading] = useState(true)
 
   const loadAll = useCallback(async () => {
     setLoading(true)
     try {
-      const params = { limit: 500, ...(accountId ? { account_id: accountId } : {}) }
-      const all = await api.getListings(params)
+      const dedupeById = (items) => {
+        const map = new Map()
+        const precedence = ['published', 'draft', 'expired', 'deleted']
+        const score = (s) => {
+          if (!s) return precedence.length
+          const idx = precedence.indexOf(s)
+          return idx === -1 ? precedence.length : idx
+        }
+          ; (items || []).forEach((item) => {
+            if (!item?.id) return
+            const id = String(item.id)
+            const existing = map.get(id)
+            if (!existing) { map.set(id, item); return }
+            const exScore = score(existing.status)
+            const newScore = score(item.status)
+            if (newScore < exScore) {
+              map.set(id, item)
+            } else if (newScore === exScore) {
+              // prefer newer updated_at if present
+              const exTime = existing.updated_at ? new Date(existing.updated_at).getTime() : 0
+              const newTime = item.updated_at ? new Date(item.updated_at).getTime() : 0
+              if (newTime >= exTime) map.set(id, item)
+            }
+          })
+        return Array.from(map.values())
+      }
+
+      // Use local managementAccountId for listing management filtering (independent from global selected account)
+      const baseParams = { limit: 500, ...(managementAccountId ? { account_id: managementAccountId } : {}) }
+      const allForStats = dedupeById(await api.getListings(baseParams))
       setStats({
-        total: all.length,
-        published: all.filter((l) => l.status === 'published').length,
-        draft: all.filter((l) => l.status === 'draft').length,
-        expired: all.filter((l) => ['expired','deleted'].includes(l.status)).length,
+        total: allForStats.length,
+        published: allForStats.filter((l) => l.status === 'published').length,
+        draft: allForStats.filter((l) => l.status === 'draft').length,
+        expired: allForStats.filter((l) => l.status === 'expired').length,
       })
 
-      // filter by tab
-      let filtered = tabFilter === 'all' ? all
-        : tabFilter === 'expired' ? all.filter((l) => ['expired','deleted'].includes(l.status))
-        : all.filter((l) => l.status === tabFilter)
+      const listParams = { ...baseParams }
+      if (tabFilter !== 'all') {
+        listParams.status = tabFilter
+      }
+      let filtered = dedupeById(await api.getListings(listParams))
 
       // search
       if (search) filtered = filtered.filter((l) => l.title?.toLowerCase().includes(search.toLowerCase()))
@@ -266,42 +299,96 @@ export default function ListingManagement() {
         if (sortBy === 'newest') return new Date(b.created_at) - new Date(a.created_at)
         if (sortBy === 'oldest') return new Date(a.created_at) - new Date(b.created_at)
         if (sortBy === 'price-high') return (b.price || 0) - (a.price || 0)
-        if (sortBy === 'price-low')  return (a.price || 0) - (b.price || 0)
+        if (sortBy === 'price-low') return (a.price || 0) - (b.price || 0)
         return 0
       })
       setListings(filtered)
-    } catch { setListings([]) }
-    finally { setLoading(false) }
-  }, [accountId, tabFilter, search, sortBy])
+    } catch {
+      setListings([])
+    } finally {
+      setLoading(false)
+    }
+  }, [managementAccountId, tabFilter, search, sortBy])
 
   useEffect(() => { loadAll() }, [loadAll])
-  useEffect(() => { setPage(1) }, [tabFilter, search, sortBy, accountId])
+  useEffect(() => { setPage(1) }, [tabFilter, search, sortBy, managementAccountId])
+
+  // Load verified accounts for the local Account filter (only verified accounts shown)
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      setAccountsLoading(true)
+      try {
+        const data = await api.getAccounts()
+        // verified accounts: cookies truthy; exclude unverified/deleted/invalid
+        const verified = (data || []).filter((a) => a && a.cookies)
+        if (!mounted) return
+        setVerifiedAccounts(verified)
+        // default to All Accounts (empty string) — do not override if user already selected one
+        setAccountsLoading(false)
+      } catch (e) {
+        if (!mounted) return
+        setVerifiedAccounts([])
+        setAccountsLoading(false)
+      }
+    }
+    load()
+    return () => { mounted = false }
+  }, [])
+
+  useEffect(() => {
+    if (task?.status && ['completed', 'failed', 'cancelled'].includes(task.status)) {
+      loadAll()
+    }
+  }, [task?.status, loadAll])
 
   const handleDelete = async () => {
     if (!deleteTarget) return
+    const targetAccountId = deleteTarget.account_id || accountId
+    if (!targetAccountId) return
     setDeleting(true)
-    try { await api.deleteListing(deleteTarget.id); setDeleteTarget(null); await loadAll() }
-    catch {} finally { setDeleting(false) }
+    try {
+      await runTask('delete-listing', {
+        account_id: targetAccountId,
+        listing_id: deleteTarget.id,
+      })
+      setDeleteTarget(null)
+    } catch {
+    } finally {
+      setDeleting(false)
+    }
   }
 
   const handlePublish = async (listing) => {
-    try { await api.updateListing(listing.id, { status: 'published' }); await loadAll() } catch {}
+    const targetAccountId = listing?.account_id || accountId
+    if (!targetAccountId) return
+    try {
+      await runTask('publish-listing', {
+        account_id: targetAccountId,
+        listing_id: listing.id,
+        delay_seconds: 5,
+      })
+    } catch { }
   }
 
   const handleRenew = async (listing) => {
-    if (!accountId) return
+    const targetAccountId = listing?.account_id || accountId
+    if (!targetAccountId) return
     try {
-      await api.startAutomation('renew-listings', {
-        account_id: accountId, listing_ids: [listing.id], max_renew: 1, delay_seconds: 5,
+      await runTask('renew-listings', {
+        account_id: targetAccountId,
+        listing_ids: [listing.id],
+        max_renew: 1,
+        delay_seconds: 5,
       })
-    } catch {}
+    } catch { }
   }
 
   const TABS = [
-    { id: 'all',       label: 'All Listings', count: stats.total     },
-    { id: 'published', label: 'Published',    count: stats.published },
-    { id: 'draft',     label: 'Draft',        count: stats.draft     },
-    { id: 'expired',   label: 'Expired',      count: stats.expired   },
+    { id: 'all', label: 'All Listings', count: stats.total },
+    { id: 'published', label: 'Published', count: stats.published },
+    { id: 'draft', label: 'Draft', count: stats.draft },
+    { id: 'expired', label: 'Expired', count: stats.expired },
   ]
 
   const paginated = listings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -324,9 +411,8 @@ export default function ListingManagement() {
               Refresh
             </button>
             <button type="button" onClick={() => setShowPanel(!showPanel)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                showPanel ? 'bg-accent-red text-white shadow shadow-red-900/40' : 'bg-white/8 border border-white/10 text-slate-300 hover:bg-white/12'
-              }`}>
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${showPanel ? 'bg-accent-red text-white shadow shadow-red-900/40' : 'bg-white/8 border border-white/10 text-slate-300 hover:bg-white/12'
+                }`}>
               ⚡ Actions
             </button>
           </div>
@@ -337,9 +423,9 @@ export default function ListingManagement() {
         {/* Stats */}
         <div className="flex gap-3 flex-wrap">
           <StatCard label="Total Listings" value={stats.total} />
-          <StatCard label="Published"      value={stats.published} color="text-emerald-400" />
-          <StatCard label="Draft"          value={stats.draft}     color="text-blue-400" />
-          <StatCard label="Expired"        value={stats.expired}   color="text-amber-400" />
+          <StatCard label="Published" value={stats.published} color="text-emerald-400" />
+          <StatCard label="Draft" value={stats.draft} color="text-blue-400" />
+          <StatCard label="Expired" value={stats.expired} color="text-amber-400" />
         </div>
 
         {/* Action panel */}
@@ -350,11 +436,10 @@ export default function ListingManagement() {
               <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mr-1">Action:</span>
               {ACTION_MODES.map((m) => (
                 <button key={m.id} type="button" onClick={() => setActionMode(m.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    actionMode === m.id
-                      ? 'bg-accent-red text-white shadow shadow-red-900/30'
-                      : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/8'
-                  }`}>
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${actionMode === m.id
+                    ? 'bg-accent-red text-white shadow shadow-red-900/30'
+                    : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/8'
+                    }`}>
                   {m.icon} {m.label}
                 </button>
               ))}
@@ -375,13 +460,11 @@ export default function ListingManagement() {
           <div className="flex gap-1 p-1 bg-white/5 rounded-xl">
             {TABS.map((t) => (
               <button key={t.id} type="button" onClick={() => setTabFilter(t.id)}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                  tabFilter === t.id ? 'bg-accent-red text-white shadow shadow-red-900/30' : 'text-slate-400 hover:text-white'
-                }`}>
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${tabFilter === t.id ? 'bg-accent-red text-white shadow shadow-red-900/30' : 'text-slate-400 hover:text-white'
+                  }`}>
                 {t.label}
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                  tabFilter === t.id ? 'bg-white/20 text-white' : 'bg-white/8 text-slate-500'
-                }`}>{t.count}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${tabFilter === t.id ? 'bg-white/20 text-white' : 'bg-white/8 text-slate-500'
+                  }`}>{t.count}</span>
               </button>
             ))}
           </div>
@@ -402,13 +485,34 @@ export default function ListingManagement() {
           </div>
         </div>
 
+        {/* Account filter (local to Listing Management) */}
+        <div className="flex items-center justify-start gap-3">
+          <div className="text-sm text-slate-400">Account</div>
+          <div>
+            <select
+              className="input text-sm"
+              value={managementAccountId || ''}
+              onChange={(e) => setManagementAccountId(e.target.value)}
+            >
+              <option value="">All Accounts</option>
+              {accountsLoading ? (
+                <option disabled>Loading…</option>
+              ) : (
+                verifiedAccounts.map((acc) => (
+                  <option key={acc.id} value={acc.id}>{acc.email || acc.phone || acc.id.slice(0, 8)}</option>
+                ))
+              )}
+            </select>
+          </div>
+        </div>
+
         {/* Table */}
         <div className="rounded-2xl border border-white/8 bg-white/3 overflow-hidden">
           {loading ? (
             <div className="flex items-center gap-3 px-6 py-10 text-sm text-slate-400">
               <svg className="animate-spin h-4 w-4 text-accent-red shrink-0" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
               </svg>
               Loading listings…
             </div>
@@ -437,7 +541,7 @@ export default function ListingManagement() {
                       <tr key={listing.id} className="hover:bg-white/3 transition-colors">
                         <td className="px-4 py-3">
                           {listing.images?.[0]
-                            ? <img src={listing.images[0]} alt="" className="w-10 h-10 rounded-lg object-cover bg-white/8" onError={(e) => { e.target.style.display='none' }} />
+                            ? <img src={listing.images[0]} alt="" className="w-10 h-10 rounded-lg object-cover bg-white/8" onError={(e) => { e.target.style.display = 'none' }} />
                             : <div className="w-10 h-10 rounded-lg bg-white/8 flex items-center justify-center text-slate-600">📷</div>
                           }
                         </td>
@@ -463,7 +567,7 @@ export default function ListingManagement() {
                                 Publish
                               </button>
                             )}
-                            {['expired','published'].includes(listing.status) && (
+                            {listing.status === 'expired' && (
                               <button type="button" onClick={() => handleRenew(listing)}
                                 className="text-xs px-2.5 py-1 rounded-lg bg-blue-500/15 text-blue-400 border border-blue-500/25 hover:bg-blue-500/25 transition-all font-semibold">
                                 Renew

@@ -23,6 +23,7 @@ export default function AIUltraListings({ feature }) {
   const [extraDetails, setExtraDetails] = useState('')
   const [imagePaths, setImagePaths] = useState([])
   const { statusMessage, busy, task, runTask, cancelTask, setStatusMessage } = useAutomationTask()
+  const listingCount = 1
 
   const canStart = selectedAccountIds.length > 0 && imagePaths.length > 0
 
