@@ -40,7 +40,7 @@ export function hasToken() {
 // ── Axios instance ───────────────────────────────────────────────────────────
 const instance = axios.create({
   baseURL: baseUrl,
-  timeout: 30000,
+  timeout: 60000,
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -112,6 +112,24 @@ const api = {
 
   verifyAccountInteractive: (id) =>
     instance.post(`/api/accounts/${id}/verify-interactive`).then((res) => res.data),
+
+  verifySession: async (formData) => {
+    console.log('[api] verifySession called with FormData')
+    try {
+      // Override default Content-Type header to allow axios to set multipart/form-data boundary
+      const { data } = await instance.post('/api/accounts/verify-session', formData, {
+        headers: { 'Content-Type': undefined }  // Let axios set the boundary
+      })
+      console.log('[api] verifySession response:', data)
+      return data
+    } catch (err) {
+      console.error('[api] verifySession error:', err.response?.data || err.message)
+      throw err
+    }
+  },
+
+  createImportSessionAccount: (payload) =>
+    instance.post('/api/accounts/', payload).then((res) => res.data),
 
   // ── Listings ───────────────────────────────────────────────────────────────
   getListings: (params = {}) =>

@@ -216,14 +216,15 @@ export default function AccountListings({ feature }) {
     setBusy(true); setStatusMessage(''); setTasks([])
 
     const basePayload = {
-      listing_count: 1,
+      // listing_count = number of images → each image becomes a separate listing
+      listing_count: imagePaths.length,
       delay_seconds: delaySeconds,
       use_ai: activeMode.isV2 ? useAi : true,
       product_name: productName || 'Sample product',
       description: description || '',
       category, condition,
       price: price * 100,
-      images: imagePaths,
+      images: imagePaths,   // backend picks images[i] for listing i
       ...(activeMode.isV2 ? {
         warmup_before: warmupBefore,
         warmup_steps: Math.min(10, Math.max(1, warmupSteps)),
@@ -409,9 +410,11 @@ export default function AccountListings({ feature }) {
             </ConfigPanel>
           )}
 
-          {selectedAccountIds.length > 0 && (
+          {selectedAccountIds.length > 0 && imagePaths.length > 0 && (
             <div className="rounded-xl border border-blue-500/20 bg-blue-500/8 px-4 py-3 text-xs text-blue-300">
-              ℹ️ Listing will be posted on <strong className="text-blue-200">{selectedAccountIds.length} account{selectedAccountIds.length > 1 ? 's' : ''}</strong> — 1 post per account using <strong className="text-blue-200">{activeMode?.label}</strong> mode.
+              ℹ️ <strong className="text-blue-200">{imagePaths.length} listing{imagePaths.length > 1 ? 's' : ''}</strong> will be posted per account
+              {selectedAccountIds.length > 1 && <> on <strong className="text-blue-200">{selectedAccountIds.length} accounts</strong> = <strong className="text-blue-200">{imagePaths.length * selectedAccountIds.length}</strong> total posts</>}
+              {' '}— each with a <strong className="text-blue-200">different image</strong>, same title/price.
             </div>
           )}
 

@@ -10,11 +10,10 @@ function Toast({ toasts, onRemove }) {
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
       {toasts.map((t) => (
-        <div key={t.id} className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm shadow-xl max-w-sm ${
-          t.type === 'success' ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
+        <div key={t.id} className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm shadow-xl max-w-sm ${t.type === 'success' ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
           : t.type === 'warning' ? 'border-amber-500/30 bg-amber-500/10 text-amber-200'
-          : 'border-red-500/30 bg-red-500/10 text-red-200'
-        }`}>
+            : 'border-red-500/30 bg-red-500/10 text-red-200'
+          }`}>
           <span className="flex-1">{t.message}</span>
           <button type="button" onClick={() => onRemove(t.id)} className="opacity-50 hover:opacity-100 shrink-0">✕</button>
         </div>
@@ -36,35 +35,152 @@ function useToast() {
 
 // ── Account Form Modal ────────────────────────────────────────────────────────
 function AccountFormModal({ initial, onSave, onClose, saving }) {
-  const [loginType, setLoginType] = useState(initial?.phone ? 'phone' : 'email')
-  const [email, setEmail]         = useState(initial?.email || '')
-  const [phone, setPhone]         = useState(initial?.phone || '')
-  const [password, setPassword]   = useState('')
-  const [showPass, setShowPass]   = useState(false)
-  const [proxy, setProxy]         = useState(initial?.proxy || '')
-  const [notes, setNotes]         = useState(initial?.notes || '')
-  const [error, setError]         = useState('')
-  const overlayRef                = useRef(null)
+  const [email, setEmail] = useState(initial?.email || '')
+  const [sessionFileName, setSessionFileName] = useState('')
+  const [sessionFile, setSessionFile] = useState(null)
+  const [sessionData, setSessionData] = useState('')
+  const [sessionError, setSessionError] = useState('')
+  const [sessionStatus, setSessionStatus] = useState('')
+  const [verifyingSession, setVerifyingSession] = useState(false)
+  const [error, setError] = useState('')
+  const overlayRef = useRef(null)
+
+  const canVerifySession = Boolean(sessionFile && sessionData.trim() && !verifyingSession)
+
+  const validateSessionPayload = (value) => {
+    if (!value || !value.trim()) throw new Error('Session upload is required')
+
+    let parsed
+    try {
+      parsed = JSON.parse(value)
+    } catch {
+      throw new Error('Invalid JSON. Upload a valid Playwright storageState JSON file.')
+    }
+
+    if (!parsed || typeof parsed !== 'object') {
+      throw new Error('Session payload must be a JSON object or an array of cookies.')
+    }
+
+    const normalized = Array.isArray(parsed)
+      ? { cookies: parsed }
+      : parsed
+
+    const hasCookies = Array.isArray(normalized.cookies) && normalized.cookies.length > 0
+    const hasOrigins = Array.isArray(normalized.origins) && normalized.origins.length > 0
+    const nestedBrowserCookies = normalized.browserSession && Array.isArray(normalized.browserSession.cookies) && normalized.browserSession.cookies.length > 0
+
+    if (!hasCookies && !hasOrigins && !nestedBrowserCookies) {
+      throw new Error('Required session data is missing. Expected cookies or origins.')
+    }
+
+    return normalized
+  }
+
+  const handleSessionFile = async (event) => {
+    const file = event.target.files?.[0]
+    console.log('[AccountsView] JSON selected', file?.name || 'none')
+    if (!file) {
+      setSessionFile(null)
+      setSessionData('')
+      setSessionFileName('')
+      setSessionStatus('')
+      setSessionError('Session upload is required')
+      return
+    }
+    try {
+      const text = await file.text()
+      const normalized = validateSessionPayload(text)
+      setSessionFile(file)
+      setSessionData(JSON.stringify(normalized))
+      setSessionFileName(file.name)
+      setSessionStatus('')
+      setSessionError('')
+      console.log('[AccountsView] JSON parsed successfully')
+    } catch (err) {
+      setSessionFile(null)
+      setSessionData('')
+      setSessionFileName('')
+      setSessionStatus('')
+      setSessionError(err.message || 'Invalid session file')
+      console.error('[AccountsView] Error received', err)
+    }
+  }
+
+  const verifySession = async () => {
+    console.log('[AccountsView] ===== Verify Session Started =====')
+    console.log('[AccountsView] canVerifySession:', canVerifySession)
+    console.log('[AccountsView] sessionFile:', sessionFile?.name || 'null')
+    console.log('[AccountsView] sessionData.length:', sessionData.length)
+
+    if (!sessionFile || !sessionData.trim()) {
+      console.error('[AccountsView] ERROR: Verify preconditions not met')
+      setSessionError('Choose a session JSON file first')
+      return
+    }
+
+    const normalizedEmail = email.trim()
+
+    console.log('[AccountsView] Building FormData payload...')
+    const formData = new FormData()
+    formData.append('session_file', sessionFile)
+    formData.append('session_data', sessionData)
+    formData.append('account_name', normalizedEmail || 'Facebook Account')
+    formData.append('email', normalizedEmail)
+    console.log('[AccountsView] FormData ready, entries:', Array.from(formData.entries()).map(([k, v]) => `${k}:${typeof v === 'object' ? v.name || 'object' : v.substring ? v.substring(0, 50) : v}`))
+
+    setVerifyingSession(true)
+    setSessionError('')
+
+    try {
+      console.log('[AccountsView] Calling api.verifySession...')
+      const response = await api.verifySession(formData)
+      console.log('[AccountsView] SUCCESS: Response received:', response)
+
+      if (response?.verified) {
+        console.log('[AccountsView] Session verified successfully!')
+        setSessionStatus('verified')
+        setSessionError('')
+        setError('')
+      } else {
+        console.log('[AccountsView] Session verification failed:', response?.message)
+        setSessionStatus('error')
+        setSessionError(response?.message || 'Session verification failed')
+      }
+    } catch (err) {
+      console.error('[AccountsView] ERROR in verifySession:', err)
+      const detail = err?.response?.data?.detail || err?.message || 'Session verification failed'
+      console.error('[AccountsView] Error detail:', detail)
+      setSessionStatus('error')
+      setSessionError(detail)
+    } finally {
+      console.log('[AccountsView] Verification completed, setting verifyingSession to false')
+      setVerifyingSession(false)
+    }
+  }
 
   const submit = async () => {
-    if (loginType === 'email') {
-      if (!email.trim()) { setError('Email is required'); return }
-      if (!email.includes('@')) { setError('Enter a valid email'); return }
-    } else {
-      if (!phone.trim()) { setError('Phone is required'); return }
-      if (!/^\+?[\d\s\-()]{7,}$/.test(phone.trim())) { setError('Enter a valid phone e.g. +923001234567'); return }
+    const normalizedEmail = email.trim()
+    if (!normalizedEmail) {
+      setError('Email is required')
+      return
     }
-    if (!initial && !password.trim()) { setError('Password is required'); return }
-    if (password && password.length < 6) { setError('Password too short (min 6 chars)'); return }
+
+    if (!initial && (!sessionFile || !sessionStatus || sessionStatus !== 'verified')) {
+      setError('Verify the uploaded session before saving')
+      return
+    }
+
     setError('')
     const payload = {
-      email: loginType === 'email' ? email : null,
-      phone: loginType === 'phone' ? phone : null,
-      proxy: proxy || null,
-      notes: notes || null,
+      email: normalizedEmail,
     }
-    if (password) payload.password = password
     if (initial?.id) payload.status = initial.status
+    try {
+      payload.session_data = JSON.parse(sessionData)
+    } catch {
+      setError('The uploaded session file could not be parsed')
+      return
+    }
     await onSave(payload)
   }
 
@@ -73,7 +189,7 @@ function AccountFormModal({ initial, onSave, onClose, saving }) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
       onClick={(e) => e.target === overlayRef.current && onClose()}
     >
-      <div className="w-full max-w-lg mx-4 rounded-2xl bg-[#1a1f35] border border-white/10 shadow-2xl overflow-hidden">
+      <div className="w-full max-w-lg mx-4 rounded-2xl bg-[#1a1f35] border border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="px-7 pt-6 pb-4 border-b border-white/5 flex items-center justify-between">
           <div>
@@ -88,7 +204,7 @@ function AccountFormModal({ initial, onSave, onClose, saving }) {
           </button>
         </div>
         {/* Body */}
-        <div className="px-7 py-5 space-y-4">
+        <div className="px-7 py-5 space-y-4 overflow-y-auto">
           {error && (
             <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-300 flex gap-2">
               <span>⚠</span><span>{error}</span>
@@ -105,56 +221,39 @@ function AccountFormModal({ initial, onSave, onClose, saving }) {
             </div>
           )}
 
-          {/* Login type toggle */}
-          <div className="flex gap-1 p-1 bg-white/5 rounded-xl">
-            {[['email','Email'],['phone','Phone Number']].map(([t, label]) => (
-              <button key={t} type="button"
-                className={`flex-1 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                  loginType === t ? 'bg-accent-red text-white shadow shadow-red-900/40' : 'text-slate-400 hover:text-white'
-                }`}
-                onClick={() => setLoginType(t)}>{label}</button>
-            ))}
-          </div>
-
-          {loginType === 'email' ? (
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Email</label>
-              <input className="input" type="email" placeholder="fbuser@example.com"
-                value={email} onChange={(e) => setEmail(e.target.value)} autoFocus />
-            </div>
-          ) : (
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Phone Number</label>
-              <input className="input" placeholder="+923001234567"
-                value={phone} onChange={(e) => setPhone(e.target.value)} autoFocus />
-            </div>
-          )}
-
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-              Password {initial ? '(blank = keep current)' : ''}
-            </label>
-            <div className="flex gap-2">
-              <input className="input flex-1" type={showPass ? 'text' : 'password'}
-                placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
-              <button type="button" onClick={() => setShowPass(!showPass)}
-                className="px-3 rounded-lg border border-white/10 bg-white/5 text-xs text-slate-400 hover:text-white shrink-0">
-                {showPass ? 'Hide' : 'Show'}
-              </button>
-            </div>
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Email</label>
+            <input
+              className="input"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoFocus
+            />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Proxy (optional)</label>
-              <input className="input" placeholder="ip:port:user:pass"
-                value={proxy} onChange={(e) => setProxy(e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Notes (optional)</label>
-              <input className="input" placeholder="e.g. 2fa: SECRET"
-                value={notes} onChange={(e) => setNotes(e.target.value)} />
-            </div>
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Session JSON</label>
+            <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-white/15 bg-white/5 px-4 py-5 text-center text-sm text-slate-300 transition hover:bg-white/10">
+              <span className="font-semibold text-white">{sessionFileName || 'Choose File'}</span>
+              <span className="mt-1 text-xs text-slate-400">.json only • Playwright storageState or exported browser session</span>
+              <input type="file" accept=".json,application/json" className="hidden" onChange={handleSessionFile} />
+            </label>
+            <button
+              type="button"
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                verifySession()
+              }}
+              disabled={!canVerifySession}
+              className="w-full rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm font-semibold text-emerald-300 hover:bg-emerald-500/20 disabled:opacity-50 cursor-pointer"
+            >
+              {verifyingSession ? 'Verifying…' : 'Verify Session'}
+            </button>
+            {sessionError && <p className="text-xs text-red-300">{sessionError}</p>}
+            {sessionStatus === 'verified' && <p className="text-xs text-emerald-300">✓ Session Verified</p>}
           </div>
         </div>
         {/* Footer */}
@@ -165,8 +264,8 @@ function AccountFormModal({ initial, onSave, onClose, saving }) {
                        disabled:opacity-50 flex items-center justify-center gap-2">
             {saving ? (
               <><svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
               </svg>Verifying…</>
             ) : initial ? 'Save Changes' : 'Add Account'}
           </button>
@@ -182,14 +281,14 @@ function AccountFormModal({ initial, onSave, onClose, saving }) {
 
 // ── Main View ─────────────────────────────────────────────────────────────────
 export default function AccountsView() {
-  const [accounts, setAccounts]       = useState([])
-  const [loading, setLoading]         = useState(true)
-  const [showModal, setShowModal]     = useState(false)
-  const [editingAccount, setEditing]  = useState(null)
-  const [saving, setSaving]           = useState(false)
-  const [deleteId, setDeleteId]       = useState(null)
+  const [accounts, setAccounts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+  const [editingAccount, setEditing] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [deleteId, setDeleteId] = useState(null)
   const [verifyingId, setVerifyingId] = useState(null)
-  const [page, setPage]               = useState(1)
+  const [page, setPage] = useState(1)
   const { toasts, add: addToast, remove: removeToast } = useToast()
 
   const loadAccounts = useCallback(async () => {
@@ -205,11 +304,11 @@ export default function AccountsView() {
 
   useEffect(() => { loadAccounts() }, [loadAccounts])
 
-  const openAdd  = () => { setEditing(null); setShowModal(true) }
+  const openAdd = () => { setEditing(null); setShowModal(true) }
   const openEdit = (acc) => { setEditing(acc); setShowModal(true) }
   const closeModal = () => { setShowModal(false); setEditing(null) }
 
-  const handleSave = async (payload) => {
+  const handleSave = async (payload, options = {}) => {
     setSaving(true)
     try {
       if (editingAccount?.id) {
@@ -244,7 +343,7 @@ export default function AccountsView() {
 
   const handleVerify = async (id) => {
     setVerifyingId(id)
-    addToast('Opening browser — complete login/2FA if prompted…', 'warning', 200000)
+    addToast('Checking the saved Facebook session…', 'warning', 200000)
     try {
       const result = await api.verifyAccount(id)
       addToast(result.message || 'Account verified!', 'success')
@@ -299,8 +398,8 @@ export default function AccountsView() {
         {saving && (
           <div className="rounded-xl border border-blue-500/25 bg-blue-500/8 p-4 text-sm text-blue-200 flex items-center gap-3">
             <svg className="animate-spin h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
             </svg>
             <div>
               <div className="font-semibold">Verifying Facebook account…</div>
@@ -321,8 +420,8 @@ export default function AccountsView() {
           {loading ? (
             <div className="px-5 py-8 flex items-center gap-3 text-sm text-slate-400">
               <svg className="animate-spin h-4 w-4 text-accent-red shrink-0" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
               </svg>
               Loading accounts…
             </div>
@@ -383,16 +482,15 @@ export default function AccountsView() {
                           <div className="flex gap-1.5 flex-wrap">
                             <button type="button" disabled={verifyingId === acc.id}
                               onClick={() => handleVerify(acc.id)}
-                              className={`text-xs px-2.5 py-1 rounded-lg font-semibold transition-all ${
-                                acc.cookies
-                                  ? 'bg-white/8 text-slate-300 hover:bg-white/15 border border-white/10'
-                                  : 'bg-accent-red text-white hover:bg-red-500 shadow shadow-red-900/30'
-                              }`}>
+                              className={`text-xs px-2.5 py-1 rounded-lg font-semibold transition-all ${acc.cookies
+                                ? 'bg-white/8 text-slate-300 hover:bg-white/15 border border-white/10'
+                                : 'bg-accent-red text-white hover:bg-red-500 shadow shadow-red-900/30'
+                                }`}>
                               {verifyingId === acc.id ? (
                                 <span className="flex items-center gap-1">
                                   <svg className="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                                   </svg>Wait…
                                 </span>
                               ) : acc.cookies ? 'Re-verify' : 'Verify'}
