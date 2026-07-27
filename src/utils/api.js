@@ -5,7 +5,13 @@ import axios from 'axios'
 const DEFAULT_BACKEND_URL = 'https://pylister.axorawebsolutions.com'
 
 // On startup: load from localStorage, fallback to default production URL
-let baseUrl = (localStorage.getItem('fb_base_url') || DEFAULT_BACKEND_URL).replace(/\/+$/, '')
+// If stored URL is the old wrong domain or empty, reset it to default
+const _stored = localStorage.getItem('fb_base_url') || ''
+const _isWrongUrl = _stored === '' || _stored.includes('outreach.axorawebsolutions.com')
+if (_isWrongUrl) {
+  localStorage.setItem('fb_base_url', DEFAULT_BACKEND_URL)
+}
+let baseUrl = (_isWrongUrl ? DEFAULT_BACKEND_URL : _stored).replace(/\/+$/, '')
 
 export function getBaseUrl() {
   return baseUrl
