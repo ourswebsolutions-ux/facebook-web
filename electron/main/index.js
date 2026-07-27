@@ -6,7 +6,7 @@ const fs   = require('fs')
 console.count("MAIN PROCESS LOADED");
 console.log("PID:", process.pid);
 console.log("FILE:", __filename);
-const isDev = process.env.NODE_ENV === 'development'
+const isDev = process.env.NODE_ENV === 'developmen'
 
 console.log(isDev,"sdf")
 const axios = require('axios')
