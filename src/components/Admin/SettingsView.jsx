@@ -163,6 +163,8 @@ export default function SettingsView() {
     clearToken()
     setAuth({ user: null, loading: false, error: null })
     setAuthLoading(false)
+    // Redirect to login page via App.jsx listener
+    window.dispatchEvent(new CustomEvent('auth:logout'))
   }
 
   const user = auth?.user

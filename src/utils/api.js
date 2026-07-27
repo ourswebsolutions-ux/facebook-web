@@ -53,12 +53,14 @@ instance.interceptors.request.use((config) => {
   return config
 })
 
-// Auto-clear token on 401
+// Auto-clear token on 401 and broadcast so App can redirect to login
 instance.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err?.response?.status === 401) {
       clearToken()
+      // Notify the app to redirect to login screen
+      window.dispatchEvent(new CustomEvent('auth:logout'))
     }
     return Promise.reject(err)
   }
@@ -163,6 +165,15 @@ const api = {
 
   getAllLogs: (params = {}) =>
     instance.get('/api/tasks/logs/all', { params }).then((res) => res.data),
+
+  deleteLog: (logId) =>
+    instance.delete(`/api/tasks/logs/${logId}`).then((res) => res.data),
+
+  deleteLogsBulk: (logIds) =>
+    instance.delete('/api/tasks/logs/bulk', { data: { log_ids: logIds } }).then((res) => res.data),
+
+  deleteAllLogs: () =>
+    instance.delete('/api/tasks/logs/all').then((res) => res.data),
 
   cleanupStuckTasks: () =>
     instance.post('/api/tasks/cleanup-stuck').then((res) => res.data),

@@ -136,7 +136,7 @@ function AccountFormModal({ initial, onSave, onClose, saving }) {
       const response = await api.verifySession(formData)
       console.log('[AccountsView] SUCCESS: Response received:', response)
 
-      if (response?.verified) {
+      if (response?.valid || response?.verified) {
         console.log('[AccountsView] Session verified successfully!')
         setSessionStatus('verified')
         setSessionError('')
