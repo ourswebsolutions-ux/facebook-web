@@ -36,8 +36,7 @@ function useToast() {
 // ── Account Form Modal ────────────────────────────────────────────────────────
 function AccountFormModal({ initial, onSave, onClose, saving }) {
   const [email, setEmail] = useState(initial?.email || '')
-  const [sessionFileName, setSessionFileName] = useState('')
-  const [sessionFile, setSessionFile] = useState(null)
+  const [sessionText, setSessionText] = useState('')
   const [sessionData, setSessionData] = useState('')
   const [sessionError, setSessionError] = useState('')
   const [sessionStatus, setSessionStatus] = useState('')
@@ -45,16 +44,41 @@ function AccountFormModal({ initial, onSave, onClose, saving }) {
   const [error, setError] = useState('')
   const overlayRef = useRef(null)
 
-  const canVerifySession = Boolean(sessionFile && sessionData.trim() && !verifyingSession)
+  const canVerifySession = Boolean(sessionText.trim() && !verifyingSession)
 
   const validateSessionPayload = (value) => {
-    if (!value || !value.trim()) throw new Error('Session upload is required')
+    if (!value || !value.trim()) throw new Error('Session JSON is required')
 
+    const trimmed = value.trim()
+
+    // ── Semicolon-separated format: name=value; name2=value2 ──
+    // Detect if it looks like cookie header string (not JSON)
+    if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) {
+      const pairs = trimmed.split(';').map(p => p.trim()).filter(Boolean)
+      const cookies = pairs.map(pair => {
+        const eqIdx = pair.indexOf('=')
+        if (eqIdx === -1) return null
+        return {
+          name: pair.slice(0, eqIdx).trim(),
+          value: pair.slice(eqIdx + 1).trim(),
+          domain: '.facebook.com',
+          path: '/',
+          httpOnly: false,
+          secure: true,
+          sameSite: 'None',
+        }
+      }).filter(Boolean)
+
+      if (cookies.length === 0) throw new Error('No valid cookies found in semicolon-separated input.')
+      return { cookies }
+    }
+
+    // ── JSON format ──
     let parsed
     try {
-      parsed = JSON.parse(value)
+      parsed = JSON.parse(trimmed)
     } catch {
-      throw new Error('Invalid JSON. Upload a valid Playwright storageState JSON file.')
+      throw new Error('Invalid JSON. Paste a valid Playwright storageState or cookies JSON.')
     }
 
     if (!parsed || typeof parsed !== 'object') {
@@ -76,84 +100,57 @@ function AccountFormModal({ initial, onSave, onClose, saving }) {
     return normalized
   }
 
-  const handleSessionFile = async (event) => {
-    const file = event.target.files?.[0]
-    console.log('[AccountsView] JSON selected', file?.name || 'none')
-    if (!file) {
-      setSessionFile(null)
-      setSessionData('')
-      setSessionFileName('')
-      setSessionStatus('')
-      setSessionError('Session upload is required')
-      return
-    }
-    try {
-      const text = await file.text()
-      const normalized = validateSessionPayload(text)
-      setSessionFile(file)
-      setSessionData(JSON.stringify(normalized))
-      setSessionFileName(file.name)
-      setSessionStatus('')
-      setSessionError('')
-      console.log('[AccountsView] JSON parsed successfully')
-    } catch (err) {
-      setSessionFile(null)
-      setSessionData('')
-      setSessionFileName('')
-      setSessionStatus('')
-      setSessionError(err.message || 'Invalid session file')
-      console.error('[AccountsView] Error received', err)
-    }
+  const handleSessionTextChange = (e) => {
+    const value = e.target.value
+    setSessionText(value)
+    setSessionStatus('')
+    setSessionError('')
+    setSessionData('')
   }
 
   const verifySession = async () => {
-    console.log('[AccountsView] ===== Verify Session Started =====')
-    console.log('[AccountsView] canVerifySession:', canVerifySession)
-    console.log('[AccountsView] sessionFile:', sessionFile?.name || 'null')
-    console.log('[AccountsView] sessionData.length:', sessionData.length)
+    if (!sessionText.trim()) {
+      setSessionError('Paste session JSON first')
+      return
+    }
 
-    if (!sessionFile || !sessionData.trim()) {
-      console.error('[AccountsView] ERROR: Verify preconditions not met')
-      setSessionError('Choose a session JSON file first')
+    let normalized
+    try {
+      normalized = validateSessionPayload(sessionText)
+      setSessionData(JSON.stringify(normalized))
+    } catch (err) {
+      setSessionError(err.message)
       return
     }
 
     const normalizedEmail = email.trim()
 
-    console.log('[AccountsView] Building FormData payload...')
     const formData = new FormData()
-    formData.append('session_file', sessionFile)
-    formData.append('session_data', sessionData)
+    const blob = new Blob([JSON.stringify(normalized)], { type: 'application/json' })
+    formData.append('session_file', blob, 'session.json')
+    formData.append('session_data', JSON.stringify(normalized))
     formData.append('account_name', normalizedEmail || 'Facebook Account')
     formData.append('email', normalizedEmail)
-    console.log('[AccountsView] FormData ready, entries:', Array.from(formData.entries()).map(([k, v]) => `${k}:${typeof v === 'object' ? v.name || 'object' : v.substring ? v.substring(0, 50) : v}`))
 
     setVerifyingSession(true)
     setSessionError('')
 
     try {
-      console.log('[AccountsView] Calling api.verifySession...')
       const response = await api.verifySession(formData)
-      console.log('[AccountsView] SUCCESS: Response received:', response)
 
       if (response?.valid || response?.verified) {
-        console.log('[AccountsView] Session verified successfully!')
         setSessionStatus('verified')
         setSessionError('')
         setError('')
       } else {
-        console.log('[AccountsView] Session verification failed:', response?.message)
         setSessionStatus('error')
         setSessionError(response?.message || 'Session verification failed')
       }
     } catch (err) {
-      console.error('[AccountsView] ERROR in verifySession:', err)
       const detail = err?.response?.data?.detail || err?.message || 'Session verification failed'
-      console.error('[AccountsView] Error detail:', detail)
       setSessionStatus('error')
       setSessionError(detail)
     } finally {
-      console.log('[AccountsView] Verification completed, setting verifyingSession to false')
       setVerifyingSession(false)
     }
   }
@@ -165,20 +162,18 @@ function AccountFormModal({ initial, onSave, onClose, saving }) {
       return
     }
 
-    if (!initial && (!sessionFile || !sessionStatus || sessionStatus !== 'verified')) {
-      setError('Verify the uploaded session before saving')
+    if (!initial && (!sessionData || sessionStatus !== 'verified')) {
+      setError('Verify the session JSON before saving')
       return
     }
 
     setError('')
-    const payload = {
-      email: normalizedEmail,
-    }
+    const payload = { email: normalizedEmail }
     if (initial?.id) payload.status = initial.status
     try {
       payload.session_data = JSON.parse(sessionData)
     } catch {
-      setError('The uploaded session file could not be parsed')
+      setError('Session JSON could not be parsed')
       return
     }
     await onSave(payload)
@@ -234,12 +229,15 @@ function AccountFormModal({ initial, onSave, onClose, saving }) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Session JSON</label>
-            <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-white/15 bg-white/5 px-4 py-5 text-center text-sm text-slate-300 transition hover:bg-white/10">
-              <span className="font-semibold text-white">{sessionFileName || 'Choose File'}</span>
-              <span className="mt-1 text-xs text-slate-400">.json only • Playwright storageState or exported browser session</span>
-              <input type="file" accept=".json,application/json" className="hidden" onChange={handleSessionFile} />
-            </label>
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Session JSON / Cookies</label>
+            <textarea
+              className="input w-full resize-none font-mono text-xs"
+              rows={6}
+              placeholder={'Paste your cookies here (JSON format)\n\nExample:\n[{"name":"c_user","value":"...","domain":".facebook.com",...}]\n\nOr Playwright storageState: {"cookies":[...],"origins":[...]}'}
+              value={sessionText}
+              onChange={handleSessionTextChange}
+              spellCheck={false}
+            />
             <button
               type="button"
               onClick={(event) => {
@@ -362,13 +360,24 @@ export default function AccountsView() {
 
   const handleDelete = async () => {
     if (!deleteId) return
+    const idToDelete = deleteId
+    setDeleteId(null)
     try {
-      await api.deleteAccount(deleteId)
-      setDeleteId(null)
-      addToast('Account deleted.', 'success')
+      await api.deleteAccount(idToDelete)
+      setAccounts((prev) => prev.filter((a) => a.id !== idToDelete))
       setPage(1)
-      await loadAccounts()
-    } catch { addToast('Failed to delete.', 'error') }
+      addToast('Account deleted.', 'success')
+    } catch (err) {
+      const status = err?.response?.status
+      if (status === 404) {
+        // Already gone — remove from UI silently
+        setAccounts((prev) => prev.filter((a) => a.id !== idToDelete))
+        setPage(1)
+        addToast('Account deleted.', 'success')
+      } else {
+        addToast('Failed to delete.', 'error')
+      }
+    }
   }
 
   const statusBadge = (status) => {

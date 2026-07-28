@@ -457,7 +457,7 @@ export function MultiAccountSelector({ title = 'Select Accounts' }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // ImageUploader — polished drag-zone upload component
 // ─────────────────────────────────────────────────────────────────────────────
-export function ImageUploader({ imagePaths = [], onChange, required = false, maxFiles = 10 }) {
+export function ImageUploader({ imagePaths = [], onChange, required = false, maxFiles = 50 }) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [dragOver, setDragOver] = useState(false)

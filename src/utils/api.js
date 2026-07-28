@@ -7,7 +7,7 @@ const DEFAULT_BACKEND_URL = 'https://pylister.axorawebsolutions.com'
 // On startup: load from localStorage, fallback to default production URL
 // If stored URL is the old wrong domain or empty, reset it to default
 const _stored = localStorage.getItem('fb_base_url') || ''
-const _isWrongUrl = _stored === '' || _stored.includes('outreach.axorawebsolutions.com')
+const _isWrongUrl = _stored === '' || _stored.includes('outreach.axorawebsolutions.com') || _stored.includes('localhost')
 if (_isWrongUrl) {
   localStorage.setItem('fb_base_url', DEFAULT_BACKEND_URL)
 }
