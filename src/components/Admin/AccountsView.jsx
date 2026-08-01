@@ -35,7 +35,9 @@ function useToast() {
 
 // ── Account Form Modal ────────────────────────────────────────────────────────
 function AccountFormModal({ initial, onSave, onClose, saving }) {
+  const [activeTab, setActiveTab] = useState('email') // 'email' | 'phone'
   const [email, setEmail] = useState(initial?.email || '')
+  const [phone, setPhone] = useState(initial?.phone || '')
   const [sessionText, setSessionText] = useState('')
   const [sessionData, setSessionData] = useState('')
   const [sessionError, setSessionError] = useState('')
@@ -157,8 +159,14 @@ function AccountFormModal({ initial, onSave, onClose, saving }) {
 
   const submit = async () => {
     const normalizedEmail = email.trim()
-    if (!normalizedEmail) {
+    const normalizedPhone = phone.trim().replace(/\D/g, '')
+
+    if (activeTab === 'email' && !normalizedEmail) {
       setError('Email is required')
+      return
+    }
+    if (activeTab === 'phone' && !normalizedPhone) {
+      setError('Phone number is required')
       return
     }
 
@@ -168,7 +176,9 @@ function AccountFormModal({ initial, onSave, onClose, saving }) {
     }
 
     setError('')
-    const payload = { email: normalizedEmail }
+    const payload = activeTab === 'email'
+      ? { email: normalizedEmail }
+      : { email: '', phone: normalizedPhone }
     if (initial?.id) payload.status = initial.status
     try {
       payload.session_data = JSON.parse(sessionData)
@@ -184,7 +194,7 @@ function AccountFormModal({ initial, onSave, onClose, saving }) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
       onClick={(e) => e.target === overlayRef.current && onClose()}
     >
-      <div className="w-full max-w-lg mx-4 rounded-2xl bg-[#1a1f35] border border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-lg mx-4 rounded-2xl bg-[#0f0f0f] border border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="px-7 pt-6 pb-4 border-b border-white/5 flex items-center justify-between">
           <div>
@@ -216,17 +226,46 @@ function AccountFormModal({ initial, onSave, onClose, saving }) {
             </div>
           )}
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Email</label>
-            <input
-              className="input"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoFocus
-            />
+          {/* Email / Phone tabs */}
+          <div className="flex rounded-xl bg-white/5 border border-white/10 p-1 gap-1">
+            <button type="button"
+              onClick={() => setActiveTab('email')}
+              className={`flex-1 py-1.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'email' ? 'bg-accent-red text-white' : 'text-slate-400 hover:text-white'}`}>
+              Email
+            </button>
+            <button type="button"
+              onClick={() => setActiveTab('phone')}
+              className={`flex-1 py-1.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'phone' ? 'bg-accent-red text-white' : 'text-slate-400 hover:text-white'}`}>
+              Phone Number
+            </button>
           </div>
+
+          {activeTab === 'email' ? (
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Email</label>
+              <input
+                className="input"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoFocus
+              />
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Phone Number</label>
+              <input
+                className="input"
+                type="tel"
+                placeholder="e.g. 923001234567"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                autoFocus
+              />
+              <p className="text-xs text-slate-500">Enter with country code, no + or spaces</p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Session JSON / Cookies</label>
@@ -538,7 +577,7 @@ export default function AccountsView() {
       {/* Delete confirm modal */}
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="w-full max-w-sm mx-4 rounded-2xl bg-[#1a1f35] border border-white/10 shadow-2xl p-6 space-y-4">
+          <div className="w-full max-w-sm mx-4 rounded-2xl bg-[#0f0f0f] border border-white/10 shadow-2xl p-6 space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-red-500/15 flex items-center justify-center text-2xl mx-auto">🗑️</div>
             <h3 className="text-lg font-bold text-white text-center">Delete Account?</h3>
             <p className="text-sm text-slate-400 text-center">This permanently removes the account and all its data. This cannot be undone.</p>

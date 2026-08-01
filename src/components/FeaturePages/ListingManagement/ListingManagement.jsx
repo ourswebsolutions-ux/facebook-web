@@ -49,7 +49,7 @@ function StatCard({ label, value, color = 'text-white' }) {
 function DeleteModal({ listing, onConfirm, onCancel, deleting }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-sm mx-4 rounded-2xl bg-[#1a1f35] border border-white/10 shadow-2xl p-6 space-y-4">
+      <div className="w-full max-w-sm mx-4 rounded-2xl bg-[#0f0f0f] border border-white/10 shadow-2xl p-6 space-y-4">
         <div className="text-2xl text-center">🗑️</div>
         <h3 className="text-lg font-bold text-white text-center">Delete Listing?</h3>
         <p className="text-sm text-slate-400 text-center">

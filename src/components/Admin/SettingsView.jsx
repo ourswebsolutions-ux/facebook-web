@@ -41,7 +41,7 @@ function AuthModal({ onClose, onSuccess }) {
       className="absolute inset-0 z-40 flex items-center justify-center bg-black/70 backdrop-blur-sm"
       onClick={(e) => e.target === overlayRef.current && onClose()}
     >
-      <div className="w-full max-w-md mx-6 rounded-2xl bg-[#1a1f35] border border-white/10 shadow-2xl shadow-black/70 overflow-hidden">
+      <div className="w-full max-w-md mx-6 rounded-2xl bg-[#0f0f0f] border border-white/10 shadow-2xl shadow-black/70 overflow-hidden">
 
         {/* Header */}
         <div className="px-7 pt-7 pb-5 border-b border-white/5">

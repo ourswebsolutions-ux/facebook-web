@@ -96,7 +96,7 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-60 flex-shrink-0 flex flex-col bg-surface-secondary border-r border-white/5">
+    <aside className="w-60 flex-shrink-0 flex flex-col bg-black border-r border-white/5">
 
       {/* Branding header */}
       <div className="px-4 py-3 border-b border-white/5">

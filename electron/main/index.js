@@ -62,7 +62,7 @@ function createWindow() {
     minHeight: 680,
     frame: true,
     titleBarStyle: 'hidden',
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#0a0a0a',
 
     icon: iconPath,
 

@@ -80,11 +80,43 @@ export const FEATURE_SECTIONS = [
   //   id: 'listings',
   //   label: 'Listing Management',
   //   items: [
-  //     { id: 'ai-ultra-listings', label: 'AI Ultra Listings V2.0', ... },
-  //     { id: 'create-drafts', label: 'Create Only Drafts', ... },
-  //     { id: 'listing-management', label: 'Listing Management', ... },
+  //     {
+  //       id: 'listing-management',
+  //       label: 'Listing Management',
+  //       ...
+  //     },
   //   ],
   // },
+  {
+    id: 'listings',
+    label: 'Listing Management',
+    items: [
+      {
+        id: 'ai-ultra-listings',
+        label: 'AI Ultra Listings V2.0',
+        title: 'AI Ultra Listings V2.0',
+        description: 'Create ultra-optimized listings using AI automation.',
+        type: 'ai-ultra-listings',
+        actions: ['Start Listing'],
+      },
+      {
+        id: 'create-drafts',
+        label: 'Create Only Drafts',
+        title: 'Create Only Drafts',
+        description: 'Create draft listings without publishing.',
+        type: 'create-drafts',
+        actions: ['Create Drafts'],
+      },
+      // {
+      //   id: 'listing-management',
+      //   label: 'Listing Management',
+      //   title: 'Listing Management',
+      //   description: 'View, edit, and manage all active listings.',
+      //   type: 'listing-management',
+      //   actions: ['Refresh'],
+      // },
+    ],
+  },
   // {
   //   id: 'marketing',
   //   label: 'Marketing Tools',

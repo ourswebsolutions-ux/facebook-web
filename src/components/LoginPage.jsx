@@ -81,9 +81,9 @@ export default function LoginPage({ onLoginSuccess }) {
         </div>
 
         {/* Card */}
-        <div className="rounded-2xl bg-[#161b27] border border-white/8 shadow-2xl shadow-black/60 overflow-hidden">
+        <div className="rounded-2xl bg-[#0f0f0f] border border-white/8 shadow-2xl shadow-black/60 overflow-hidden">
           {/* Tab toggle */}
-          <div className="flex gap-1 p-3 border-b border-white/5 bg-[#0f131e]">
+          <div className="flex gap-1 p-3 border-b border-white/5 bg-[#0a0a0a]">
             {[['login', 'Sign In'], ['signup', 'Sign Up']].map(([m, label]) => (
               <button
                 key={m}

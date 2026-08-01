@@ -162,7 +162,7 @@ export function DropdownSelect({ options = [], value, onChange, placeholder = 'S
 
       {open && (
         <div
-          className={`absolute left-0 right-0 z-[300] max-h-64 overflow-y-auto rounded-xl border border-white/10 bg-[#16213e] p-1 shadow-2xl shadow-black/60
+          className={`absolute left-0 right-0 z-[300] max-h-64 overflow-y-auto rounded-xl border border-white/10 bg-[#0f0f0f] p-1 shadow-2xl shadow-black/60
             ${openUp ? 'bottom-full mb-2' : 'top-full mt-2'}`}
           role="listbox"
         >

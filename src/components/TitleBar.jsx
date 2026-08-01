@@ -6,7 +6,7 @@ export default function TitleBar() {
   const isMac = platform === 'darwin'
 
   return (
-    <div className="h-10 flex items-center justify-between bg-surface-secondary border-b border-white/5 flex-shrink-0 titlebar-drag select-none">
+    <div className="h-10 flex items-center justify-between bg-black border-b border-white/5 flex-shrink-0 titlebar-drag select-none">
       {isMac && (
         <div className="flex items-center gap-1.5 px-4 no-drag">
           <button
