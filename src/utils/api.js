@@ -214,6 +214,9 @@ const api = {
   openAccounts: (payload) =>
     instance.post('/api/automation/open-accounts', payload).then((res) => res.data),
 
+  generateProduct: (idea) =>
+    instance.post('/api/automation/generate-product', { idea }).then((res) => res.data),
+
   // ── File upload ────────────────────────────────────────────────────────────
   /**
    * Upload one or more image files to the backend.

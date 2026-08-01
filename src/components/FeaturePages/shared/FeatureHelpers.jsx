@@ -7,9 +7,9 @@ import api from '../../../utils/api'
 // ─────────────────────────────────────────────────────────────────────────────
 export function PageShell({ title, description, children, actions }) {
   return (
-    <div className="h-full overflow-y-auto">
-      {/* Sticky header */}
-      <div className="sticky top-0 z-10 px-8 py-5 bg-surface border-b border-white/5">
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* Fixed header */}
+      <div className="shrink-0 px-8 py-5 bg-surface border-b border-white/5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-xl font-bold text-white tracking-tight">{title}</h1>
@@ -20,8 +20,8 @@ export function PageShell({ title, description, children, actions }) {
           {actions && <div className="flex flex-wrap gap-2 pt-0.5">{actions}</div>}
         </div>
       </div>
-      {/* Body — full width, same padding as Settings */}
-      <div className="px-8 py-6 space-y-5">
+      {/* Scrollable body */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-8 py-6">
         {children}
       </div>
     </div>

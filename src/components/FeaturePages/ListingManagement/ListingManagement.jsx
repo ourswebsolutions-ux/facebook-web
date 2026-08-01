@@ -7,16 +7,9 @@ import {
   useAutomationTask, TaskProgressView,
 } from '../shared/FeatureHelpers'
 import Pagination from '../../shared/Pagination'
+import { FB_CATEGORIES } from '../shared/constants'
 
 const PAGE_SIZE = 10
-
-const FB_CATEGORIES = [
-  'Vehicles', 'Property Rentals', 'Apparel', 'Classifieds', 'Electronics',
-  'Entertainment', 'Family', 'Free Stuff', 'Garden & Outdoor', 'Hobbies',
-  'Home Goods', 'Home Improvement Supplies', 'Home Sales', 'Musical Instruments',
-  'Office Supplies', 'Pet Supplies', 'Sporting Goods', 'Toys & Games',
-  'Buy and sell groups', 'Other',
-]
 
 const ACTION_MODES = [
   { id: 'view', label: 'View Only', icon: '👁️' },

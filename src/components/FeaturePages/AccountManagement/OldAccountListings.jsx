@@ -4,14 +4,8 @@ import {
   PageShell, ActionButtons, MultiAccountSelector, SectionCard,
   ConfigPanel, Field, DropdownSelect, ImageUploader, useAutomationTask, TaskProgressView,
 } from '../shared/FeatureHelpers'
-
-const FB_CATEGORIES = [
-  'Vehicles','Property Rentals','Apparel','Classifieds','Electronics',
-  'Entertainment','Family','Free Stuff','Garden & Outdoor','Hobbies',
-  'Home Goods','Home Improvement Supplies','Home Sales','Musical Instruments',
-  'Office Supplies','Pet Supplies','Sporting Goods','Toys & Games',
-  'Buy and sell groups','Other',
-]
+import api from '../../../utils/api'
+import { FB_CATEGORIES } from '../shared/constants'
 
 export default function OldAccountListings({ feature }) {
   const selectedAccountIds = useAppStore((s) => s.selectedAccountIds)
@@ -22,15 +16,32 @@ export default function OldAccountListings({ feature }) {
   const [condition, setCondition] = useState('used_good')
   const [price, setPrice] = useState(499)
   const [imagePaths, setImagePaths] = useState([])
+  const [aiPrompt, setAiPrompt] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState('')
   const { statusMessage, busy, task, runTask, cancelTask, setStatusMessage } = useAutomationTask()
+
+  const handleAiGenerate = async () => {
+    if (!aiPrompt.trim()) return
+    setAiLoading(true)
+    setAiError('')
+    try {
+      const res = await api.generateProduct(aiPrompt.trim())
+      if (res.title) setProductName(res.title)
+      if (res.description) setDescription(res.description)
+    } catch (err) {
+      setAiError(err?.response?.data?.detail || 'AI generation failed. Try again.')
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   const canStart = selectedAccountIds.length > 0 && imagePaths.length > 0
 
   const handleAction = async () => {
     if (!canStart) return
-    // 1 listing — post on each selected account
     for (const accountId of selectedAccountIds) {
-      setStatusMessage(`Posting on account ${accountId.slice(0, 8)}…`)
+      setStatusMessage(`Posting on account ${accountId.slice(0, 8)}...`)
       await runTask('new-account-slow', {
         account_id: accountId,
         listing_count: 1,
@@ -60,11 +71,42 @@ export default function OldAccountListings({ feature }) {
             <TaskProgressView task={task} busy={busy} onCancel={cancelTask} />
           </SectionCard>
         </div>
+
         {/* Right */}
         <div className="flex-1 min-w-0 flex flex-col gap-4">
+
           <SectionCard title="Product Images" icon="🖼️">
             <ImageUploader imagePaths={imagePaths} onChange={setImagePaths} required />
           </SectionCard>
+
+          {/* AI Generate */}
+          <SectionCard title="AI Generate" icon="✨">
+            <div className="flex gap-2">
+              <input
+                className="input flex-1 text-sm"
+                placeholder="e.g. used iPhone 14 Pro Max 256GB space black"
+                value={aiPrompt}
+                onChange={(e) => { setAiPrompt(e.target.value); setAiError('') }}
+                onKeyDown={(e) => e.key === 'Enter' && handleAiGenerate()}
+              />
+              <button
+                type="button"
+                onClick={handleAiGenerate}
+                disabled={aiLoading || !aiPrompt.trim()}
+                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold disabled:opacity-50 transition-colors flex items-center gap-2 shrink-0"
+              >
+                {aiLoading
+                  ? <><svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                    </svg>Generating...</>
+                  : '⚡ Generate'}
+              </button>
+            </div>
+            {aiError && <p className="text-xs text-red-400 mt-1">{aiError}</p>}
+            <p className="text-xs text-slate-500 mt-1">Title and description will be auto-filled below.</p>
+          </SectionCard>
+
           <ConfigPanel title="Listing Details" icon="📝">
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Product Name">
@@ -76,9 +118,9 @@ export default function OldAccountListings({ feature }) {
               <Field label="Condition">
                 <select className="input" value={condition} onChange={(e) => setCondition(e.target.value)}>
                   <option value="new">New</option>
-                  <option value="used_like_new">Used — Like new</option>
-                  <option value="used_good">Used — Good</option>
-                  <option value="used_fair">Used — Fair</option>
+                  <option value="used_like_new">Used -- Like new</option>
+                  <option value="used_good">Used -- Good</option>
+                  <option value="used_fair">Used -- Fair</option>
                 </select>
               </Field>
               <Field label="Price (USD $)">
@@ -88,14 +130,15 @@ export default function OldAccountListings({ feature }) {
                 </div>
               </Field>
               <div className="sm:col-span-2">
-                <Field label="Description" hint="Optional — AI will generate if left blank">
+                <Field label="Description" hint="Optional -- AI will generate if left blank">
                   <textarea className="input min-h-[80px] resize-none" value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="e.g. Excellent condition, original packaging included…" />
+                    placeholder="e.g. Excellent condition, original packaging included..." />
                 </Field>
               </div>
             </div>
           </ConfigPanel>
+
           <ConfigPanel title="Automation Settings" icon="⚡">
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Delay between posts (sec)" hint="Min 10s recommended">
@@ -104,16 +147,18 @@ export default function OldAccountListings({ feature }) {
             </div>
             {selectedAccountIds.length > 0 && (
               <div className="rounded-xl border border-blue-500/20 bg-blue-500/8 px-4 py-3 text-xs text-blue-300">
-                ℹ️ This listing will be posted on <strong className="text-blue-200">{selectedAccountIds.length} account{selectedAccountIds.length > 1 ? 's' : ''}</strong> — 1 post per account.
+                This listing will be posted on <strong className="text-blue-200">{selectedAccountIds.length} account{selectedAccountIds.length > 1 ? 's' : ''}</strong> -- 1 post per account.
               </div>
             )}
           </ConfigPanel>
+
           {!imagePaths.length && (
             <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 flex items-start gap-2.5 text-sm text-amber-300">
               <span className="shrink-0">⚠️</span>
               <span>Upload at least one product image to enable the Start Listing button.</span>
             </div>
           )}
+
         </div>
       </div>
     </PageShell>
