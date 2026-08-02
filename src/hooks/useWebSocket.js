@@ -14,15 +14,14 @@ export function useWebSocket() {
   const pingIntervalRef = useRef(null)
   const reconnectAttemptsRef = useRef(0)
 
-  // Calculate WebSocket URL
+  // Calculate WebSocket URL from localStorage backend URL
   const getWebSocketUrl = useCallback(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    // If running under Vite dev server or production, use relative host or 127.0.0.1:8000
-    const host = window.location.host
-    if (host.includes('5173') || host.includes('3000')) {
-      return `${protocol}//127.0.0.1:8000/api/ws`
-    }
-    return `${protocol}//${host}/api/ws`
+    const stored = localStorage.getItem('fb_base_url') || 'http://localhost:8000'
+    const wsUrl = stored
+      .replace(/^https:\/\//, 'wss://')
+      .replace(/^http:\/\//, 'ws://')
+      .replace(/\/+$/, '')
+    return `${wsUrl}/api/ws`
   }, [])
 
   // Subscribe to specific event types

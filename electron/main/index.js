@@ -3,6 +3,13 @@ const { autoUpdater } = require('electron-updater')
 const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const path = require('path')
 const fs   = require('fs')
+
+// ── Bypass system proxy for localhost/127.0.0.1 ──────────────────────────────
+// When user runs app behind a system-level proxy (VPN, SOCKS etc.),
+// Electron routes localhost requests through it — causing blank UI.
+// This forces direct connection for local addresses only.
+app.commandLine.appendSwitch('proxy-bypass-list', '<local>;localhost;127.0.0.1;::1')
+
 console.count("MAIN PROCESS LOADED");
 console.log("PID:", process.pid);
 console.log("FILE:", __filename);
