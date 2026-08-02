@@ -291,8 +291,13 @@ export default function ActivityView() {
                             {e.status}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-xs text-slate-500 max-w-[200px] truncate">
-                          {typeof e.details === 'object' ? JSON.stringify(e.details) : e.details || e.message || '—'}
+                        <td className="px-4 py-3 text-xs max-w-[250px]">
+                          {e.error
+                            ? <span className="text-red-400 break-words">{e.error}</span>
+                            : <span className="text-slate-500 truncate block">
+                                {typeof e.details === 'object' ? JSON.stringify(e.details) : e.details || e.message || '—'}
+                              </span>
+                          }
                         </td>
                         {/* Single row delete */}
                         <td className="pr-4 py-3 w-10">

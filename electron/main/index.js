@@ -94,9 +94,8 @@ function createWindow() {
     callback({ responseHeaders: headers })
   })
 
-  if (isDev) {
-    mainWindow.webContents.openDevTools({ mode: 'detach' })
-  }
+  // Always open DevTools for debugging — remove before final release
+  mainWindow.webContents.openDevTools({ mode: 'detach' })
 
   mainWindow.once('ready-to-show', () => mainWindow.show());
 
