@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // ── Base URL management ──────────────────────────────────────────────────────
 // Force empty base URL for development to use Vite proxy
-let baseUrl = ''
+let baseUrl = 'http://127.0.0.1:8000'
 
 export function getBaseUrl() {
   return baseUrl

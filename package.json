@@ -63,8 +63,15 @@
       "package.json"
     ],
     "extraResources": [
-      "build/**/*"
-    ],
+  {
+    "from": "build",
+    "to": "build"
+  },
+  {
+    "from": "fb-auto-backend",
+    "to": "backend"
+  }
+],
     "win": {
       "target": [
         "nsis",

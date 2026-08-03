@@ -3,6 +3,11 @@ const { autoUpdater } = require('electron-updater')
 const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const path = require('path')
 const fs   = require('fs')
+
+const { spawn } = require('child_process')
+
+let backendProcess = null
+
 console.count("MAIN PROCESS LOADED");
 console.log("PID:", process.pid);
 console.log("FILE:", __filename);
@@ -15,9 +20,8 @@ const axios = require('axios')
 let db, waService, mainWindow
 
 const CSP = isDev
-  ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' http://localhost:* https://localhost:* ws://localhost:* wss://localhost:* http://127.0.0.1:* https://127.0.0.1:* https://outreach.axorawebsolutions.com https://pylister.axorawebsolutions.com;"
-  : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://outreach.axorawebsolutions.com https://pylister.axorawebsolutions.com;";
-function getDb() {
+  ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://outreach.axorawebsolutions.com https://pylister.axorawebsolutions.com;"
+  : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' http://127.0.0.1:* https://outreach.axorawebsolutions.com https://pylister.axorawebsolutions.com;";function getDb() {
  
 
   if (!db) {
@@ -44,8 +48,57 @@ function getWA() {
 }
 
 
+function startBackend() {
+  if (backendProcess) return;
 
+  const backendDir = app.isPackaged
+    ? path.join(process.resourcesPath, "backend")
+    : path.resolve(__dirname, "../../fb-auto-backend");
 
+  const pythonPath = process.platform === "win32"
+    ? path.join(backendDir, ".venv", "Scripts", "python.exe")
+    : path.join(backendDir, ".venv", "bin", "python");
+
+  console.log("================================");
+  console.log("Backend Folder:", backendDir);
+  console.log("Backend Exists:", fs.existsSync(backendDir));
+  console.log("Python:", pythonPath);
+  console.log("Python Exists:", fs.existsSync(pythonPath));
+  console.log("================================");
+
+  backendProcess = spawn(
+    pythonPath,
+    [
+      "-m",
+      "uvicorn",
+      "main:app",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8000"
+    ],
+    {
+      cwd: backendDir
+    }
+  );
+
+  backendProcess.stdout.on("data", data => {
+    console.log("[BACKEND]", data.toString());
+  });
+
+  backendProcess.stderr.on("data", data => {
+    console.error("[BACKEND ERROR]", data.toString());
+  });
+
+  backendProcess.on("error", err => {
+    console.error("SPAWN ERROR:", err);
+  });
+
+  backendProcess.on("close", code => {
+    console.log("Backend exited with code:", code);
+    backendProcess = null;
+  });
+}
 // ── Window ────────────────────────────────────────────────────────────────────
 function createWindow() {
   const iconPath = app.isPackaged
@@ -105,17 +158,27 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  createWindow()
 
-  if (!isDev) {
-    autoUpdater.checkForUpdatesAndNotify()
-  }
+  startBackend()
 
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
+  // Backend ko 3 second do start hone ke liye
+  setTimeout(() => {
+
+    createWindow()
+
+    if (!isDev) {
+      autoUpdater.checkForUpdatesAndNotify()
+    }
+
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow()
+      }
+    })
+
+  }, 3000)
+
 })
-
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
