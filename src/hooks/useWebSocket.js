@@ -7,22 +7,21 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 export function useWebSocket() {
   const [isConnected, setIsConnected] = useState(false)
   const [connectionError, setConnectionError] = useState(null)
-  
+
   const socketRef = useRef(null)
   const listenersRef = useRef(new Map())
   const reconnectTimeoutRef = useRef(null)
   const pingIntervalRef = useRef(null)
   const reconnectAttemptsRef = useRef(0)
 
-  // Calculate WebSocket URL
+  // Calculate WebSocket URL from localStorage backend URL
   const getWebSocketUrl = useCallback(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    // If running under Vite dev server or production, use relative host or 127.0.0.1:8000
-    const host = window.location.host
-    if (host.includes('5173') || host.includes('3000')) {
-      return `${protocol}//127.0.0.1:8000/api/ws`
-    }
-    return `${protocol}//${host}/api/ws`
+    const stored = localStorage.getItem('fb_base_url') || 'http://localhost:8000'
+    const wsUrl = stored
+      .replace(/^https:\/\//, 'wss://')
+      .replace(/^http:\/\//, 'ws://')
+      .replace(/\/+$/, '')
+    return `${wsUrl}/api/ws`
   }, [])
 
   // Subscribe to specific event types
@@ -85,7 +84,7 @@ export function useWebSocket() {
           if (ws.readyState === WebSocket.OPEN) {
             ws.send('ping')
           }
-        }, 30000)
+        }, 60000)
       }
 
       ws.onmessage = handleMessage
@@ -104,7 +103,7 @@ export function useWebSocket() {
         const timeout = Math.min(1000 * Math.pow(1.5, reconnectAttemptsRef.current), 10000)
         reconnectAttemptsRef.current += 1
         console.log(`[WebSocket] Scheduling reconnect in ${Math.round(timeout / 1000)}s...`)
-        
+
         reconnectTimeoutRef.current = setTimeout(() => {
           connect()
         }, timeout)

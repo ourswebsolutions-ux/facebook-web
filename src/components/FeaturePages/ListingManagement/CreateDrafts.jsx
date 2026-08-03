@@ -4,14 +4,8 @@ import {
   PageShell, ActionButtons, MultiAccountSelector, SectionCard,
   ConfigPanel, Field, DropdownSelect, ImageUploader, useAutomationTask, TaskProgressView,
 } from '../shared/FeatureHelpers'
-
-const FB_CATEGORIES = [
-  'Vehicles','Property Rentals','Apparel','Classifieds','Electronics',
-  'Entertainment','Family','Free Stuff','Garden & Outdoor','Hobbies',
-  'Home Goods','Home Improvement Supplies','Home Sales','Musical Instruments',
-  'Office Supplies','Pet Supplies','Sporting Goods','Toys & Games',
-  'Buy and sell groups','Other',
-]
+import { FB_CATEGORIES } from '../shared/constants'
+import api from '../../../utils/api'
 
 export default function CreateDrafts({ feature }) {
   const selectedAccountIds = useAppStore((s) => s.selectedAccountIds)
@@ -23,7 +17,25 @@ export default function CreateDrafts({ feature }) {
   const [condition, setCondition] = useState('used_good')
   const [useAi, setUseAi] = useState(true)
   const [imagePaths, setImagePaths] = useState([])
+  const [aiPrompt, setAiPrompt] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState('')
   const { statusMessage, busy, task, runTask, cancelTask } = useAutomationTask()
+
+  const handleAiGenerate = async () => {
+    if (!aiPrompt.trim()) return
+    setAiLoading(true)
+    setAiError('')
+    try {
+      const res = await api.generateProduct(aiPrompt.trim())
+      if (res.title) setTitle(res.title)
+      if (res.description) setDescription(res.description)
+    } catch (err) {
+      setAiError(err?.response?.data?.detail || 'AI generation failed. Try again.')
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   const canStart = selectedAccountIds.length > 0 && imagePaths.length > 0
 
@@ -60,6 +72,35 @@ export default function CreateDrafts({ feature }) {
           <SectionCard title="Product Images" icon="🖼️">
             <ImageUploader imagePaths={imagePaths} onChange={setImagePaths} required />
           </SectionCard>
+
+          {/* AI Generate */}
+          <SectionCard title="AI Generate" icon="✨">
+            <div className="flex gap-2">
+              <input
+                className="input flex-1 text-sm"
+                placeholder="e.g. used iPhone 14 Pro Max 256GB space black"
+                value={aiPrompt}
+                onChange={(e) => { setAiPrompt(e.target.value); setAiError('') }}
+                onKeyDown={(e) => e.key === 'Enter' && handleAiGenerate()}
+              />
+              <button
+                type="button"
+                onClick={handleAiGenerate}
+                disabled={aiLoading || !aiPrompt.trim()}
+                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold disabled:opacity-50 transition-colors flex items-center gap-2 shrink-0"
+              >
+                {aiLoading
+                  ? <><svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                    </svg>Generating...</>
+                  : '⚡ Generate'}
+              </button>
+            </div>
+            {aiError && <p className="text-xs text-red-400 mt-1">{aiError}</p>}
+            <p className="text-xs text-slate-500 mt-1">Title and description will be auto-filled below.</p>
+          </SectionCard>
+
           <ConfigPanel title="Draft Details" icon="📝">
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Title">

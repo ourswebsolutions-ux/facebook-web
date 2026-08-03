@@ -1,8 +1,22 @@
 import axios from 'axios'
 
 // ── Base URL management ──────────────────────────────────────────────────────
+<<<<<<< HEAD
 // Force empty base URL for development to use Vite proxy
 let baseUrl = 'http://127.0.0.1:8000'
+=======
+// Default production backend URL — user can override in Settings
+const DEFAULT_BACKEND_URL = 'https://pylister.axorawebsolutions.com'
+
+// On startup: load from localStorage, fallback to default production URL
+// If stored URL is the old wrong domain or empty, reset it to default
+const _stored = localStorage.getItem('fb_base_url') || ''
+const _isWrongUrl = _stored === '' || _stored.includes('outreach.axorawebsolutions.com') || _stored.includes('localhost')
+if (_isWrongUrl) {
+  localStorage.setItem('fb_base_url', DEFAULT_BACKEND_URL)
+}
+let baseUrl = (_isWrongUrl ? DEFAULT_BACKEND_URL : _stored).replace(/\/+$/, '')
+>>>>>>> 7cef7719ea71b8b631a60865e9cbbf72b2d5b384
 
 export function getBaseUrl() {
   return baseUrl
@@ -40,7 +54,7 @@ export function hasToken() {
 // ── Axios instance ───────────────────────────────────────────────────────────
 const instance = axios.create({
   baseURL: baseUrl,
-  timeout: 30000,
+  timeout: 60000,
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -53,12 +67,14 @@ instance.interceptors.request.use((config) => {
   return config
 })
 
-// Auto-clear token on 401
+// Auto-clear token on 401 and broadcast so App can redirect to login
 instance.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err?.response?.status === 401) {
       clearToken()
+      // Notify the app to redirect to login screen
+      window.dispatchEvent(new CustomEvent('auth:logout'))
     }
     return Promise.reject(err)
   }
@@ -113,6 +129,24 @@ const api = {
   verifyAccountInteractive: (id) =>
     instance.post(`/api/accounts/${id}/verify-interactive`).then((res) => res.data),
 
+  verifySession: async (formData) => {
+    console.log('[api] verifySession called with FormData')
+    try {
+      // Override default Content-Type header to allow axios to set multipart/form-data boundary
+      const { data } = await instance.post('/api/accounts/verify-session', formData, {
+        headers: { 'Content-Type': undefined }  // Let axios set the boundary
+      })
+      console.log('[api] verifySession response:', data)
+      return data
+    } catch (err) {
+      console.error('[api] verifySession error:', err.response?.data || err.message)
+      throw err
+    }
+  },
+
+  createImportSessionAccount: (payload) =>
+    instance.post('/api/accounts/', payload).then((res) => res.data),
+
   // ── Listings ───────────────────────────────────────────────────────────────
   getListings: (params = {}) =>
     instance.get('/api/listings/', { params }).then((res) => res.data),
@@ -146,6 +180,15 @@ const api = {
   getAllLogs: (params = {}) =>
     instance.get('/api/tasks/logs/all', { params }).then((res) => res.data),
 
+  deleteLog: (logId) =>
+    instance.delete(`/api/tasks/logs/${logId}`).then((res) => res.data),
+
+  deleteLogsBulk: (logIds) =>
+    instance.delete('/api/tasks/logs/bulk', { data: { log_ids: logIds } }).then((res) => res.data),
+
+  deleteAllLogs: () =>
+    instance.delete('/api/tasks/logs/all').then((res) => res.data),
+
   cleanupStuckTasks: () =>
     instance.post('/api/tasks/cleanup-stuck').then((res) => res.data),
 
@@ -175,6 +218,9 @@ const api = {
     instance.post('/api/automation/get-clicks', payload).then((res) => res.data),
   openAccounts: (payload) =>
     instance.post('/api/automation/open-accounts', payload).then((res) => res.data),
+
+  generateProduct: (idea) =>
+    instance.post('/api/automation/generate-product', { idea }).then((res) => res.data),
 
   // ── File upload ────────────────────────────────────────────────────────────
   /**

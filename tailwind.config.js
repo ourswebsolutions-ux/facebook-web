@@ -12,10 +12,10 @@ export default {
           bg: '#ECE5DD',
         },
         surface: {
-          DEFAULT: '#1a1a2e',
-          secondary: '#16213e',
-          tertiary: '#0f3460',
-          card: '#1e2a3a',
+          DEFAULT: '#0a0a0a',
+          secondary: '#0a0a0a',
+          tertiary: '#111111',
+          card: '#111111',
         },
         accent: {
           green: '#25D366',

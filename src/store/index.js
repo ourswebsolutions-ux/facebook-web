@@ -16,6 +16,8 @@ export const useAppStore = create((set) => ({
   },
   setStats: (stats) => set({ stats }),
 
+  // Auth state
+  // user: { email: string, userId: string } | null
   auth: {
     user: null,
     loading: false,
@@ -27,9 +29,10 @@ export const useAppStore = create((set) => ({
   setSelectedAccountIds: (ids) => set({ selectedAccountIds: ids }),
 
   // Global running tasks — survive tab switches
-  runningTasks: {},   // { taskId: { taskId, route, status, progress, error, result } }
+  // { taskId: { taskId, route, status, progress, error, result } }
+  runningTasks: {},
   setRunningTask: (taskId, data) => set((state) => ({
-    runningTasks: { ...state.runningTasks, [taskId]: data }
+    runningTasks: { ...state.runningTasks, [taskId]: data },
   })),
   removeRunningTask: (taskId) => set((state) => {
     const next = { ...state.runningTasks }
@@ -41,7 +44,7 @@ export const useAppStore = create((set) => ({
   // key = page id (e.g. 'account-warmup'), value = [{accountId, taskId, success, error}]
   pageSessions: {},
   setPageSession: (pageId, tasks) => set((state) => ({
-    pageSessions: { ...state.pageSessions, [pageId]: tasks }
+    pageSessions: { ...state.pageSessions, [pageId]: tasks },
   })),
   clearPageSession: (pageId) => set((state) => {
     const next = { ...state.pageSessions }
@@ -59,3 +62,14 @@ export const useAppStore = create((set) => ({
   },
   setSettings: (settings) => set({ settings }),
 }))
+
+// ── Convenience selector hooks ────────────────────────────────────────────────
+// Usage: const { email, userId } = useCurrentUser() ?? {}
+export function useCurrentUser() {
+  return useAppStore((s) => s.auth.user)
+}
+
+// Usage: const userId = useUserId()
+export function useUserId() {
+  return useAppStore((s) => s.auth.user?.userId ?? null)
+}

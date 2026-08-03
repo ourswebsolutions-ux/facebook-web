@@ -4,14 +4,7 @@ import {
   PageShell, ActionButtons, MultiAccountSelector, SectionCard,
   ConfigPanel, Field, DropdownSelect, ImageUploader, useAutomationTask, TaskProgressView,
 } from '../shared/FeatureHelpers'
-
-const FB_CATEGORIES = [
-  'Vehicles','Property Rentals','Apparel','Classifieds','Electronics',
-  'Entertainment','Family','Free Stuff','Garden & Outdoor','Hobbies',
-  'Home Goods','Home Improvement Supplies','Home Sales','Musical Instruments',
-  'Office Supplies','Pet Supplies','Sporting Goods','Toys & Games',
-  'Buy and sell groups','Other',
-]
+import { FB_CATEGORIES } from '../shared/constants'
 
 export default function SlowListings({ feature }) {
   const selectedAccountIds = useAppStore((s) => s.selectedAccountIds)

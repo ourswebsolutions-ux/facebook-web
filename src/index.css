@@ -12,7 +12,7 @@
     height: 100%;
     margin: 0;
     padding: 0;
-    background: #1a1a2e;
+    background: #0a0a0a;
     color: #e8eaf6;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -42,7 +42,8 @@
   }
 
   .card {
-    @apply bg-surface-card rounded-xl border border-white/5 p-4;
+    @apply rounded-xl border border-white/5 p-4;
+    background-color: #0f0f0f;
   }
 
   .btn {
@@ -68,10 +69,11 @@
   }
 
   .input {
-    @apply w-full px-3 py-2 bg-surface-secondary border border-white/10 rounded-lg
+    @apply w-full px-3 py-2 border border-white/10 rounded-lg
            text-sm text-white placeholder-slate-500
            focus:outline-none focus:ring-2 focus:ring-accent-red/40 focus:border-accent-red/40
            transition-colors;
+    background-color: #111111;
   }
 
   .badge {

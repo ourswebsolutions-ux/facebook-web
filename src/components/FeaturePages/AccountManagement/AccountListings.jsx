@@ -5,14 +5,7 @@ import {
   PageShell, ActionButtons, SectionCard,
   ConfigPanel, Field, DropdownSelect, ImageUploader, TaskProgressView,
 } from '../shared/FeatureHelpers'
-
-const FB_CATEGORIES = [
-  'Vehicles','Property Rentals','Apparel','Classifieds','Electronics',
-  'Entertainment','Family','Free Stuff','Garden & Outdoor','Hobbies',
-  'Home Goods','Home Improvement Supplies','Home Sales','Musical Instruments',
-  'Office Supplies','Pet Supplies','Sporting Goods','Toys & Games',
-  'Buy and sell groups','Other',
-]
+import { FB_CATEGORIES } from '../shared/constants'
 
 const LISTING_MODES = [
   {
@@ -209,6 +202,26 @@ export default function AccountListings({ feature }) {
   // Task tracking — busy is local (UI only), rest in store
   const [busy, setBusy] = useState(false)
 
+  // AI Generate
+  const [aiPrompt, setAiPrompt]   = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError]     = useState('')
+
+  const handleAiGenerate = async () => {
+    if (!aiPrompt.trim()) return
+    setAiLoading(true)
+    setAiError('')
+    try {
+      const res = await api.generateProduct(aiPrompt.trim())
+      if (res.title) setProductName(res.title)
+      if (res.description) setDescription(res.description)
+    } catch (err) {
+      setAiError(err?.response?.data?.detail || 'AI generation failed. Try again.')
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
   const canStart = selectedAccountIds.length > 0 && imagePaths.length > 0
 
   const handleAction = async () => {
@@ -216,14 +229,15 @@ export default function AccountListings({ feature }) {
     setBusy(true); setStatusMessage(''); setTasks([])
 
     const basePayload = {
-      listing_count: 1,
+      // listing_count = number of images → each image becomes a separate listing
+      listing_count: imagePaths.length,
       delay_seconds: delaySeconds,
       use_ai: activeMode.isV2 ? useAi : true,
       product_name: productName || 'Sample product',
       description: description || '',
       category, condition,
       price: price * 100,
-      images: imagePaths,
+      images: imagePaths,   // backend picks images[i] for listing i
       ...(activeMode.isV2 ? {
         warmup_before: warmupBefore,
         warmup_steps: Math.min(10, Math.max(1, warmupSteps)),
@@ -286,10 +300,10 @@ export default function AccountListings({ feature }) {
         />
       }
     >
-      <div className="grid lg:grid-cols-[300px_1fr] gap-5">
+      <div className="grid lg:grid-cols-[300px_1fr] gap-5 items-start">
 
-        {/* Left column */}
-        <div className="space-y-4">
+        {/* Left column — sticky, no scroll */}
+        <div className="space-y-4 lg:sticky lg:top-0 lg:self-start">
 
           {/* 1. Listing Mode dropdown — TOP */}
           <SectionCard title="Listing Mode" icon="🔧">
@@ -335,11 +349,39 @@ export default function AccountListings({ feature }) {
           </SectionCard>
         </div>
 
-        {/* Right column */}
+        {/* Right column — scrollable independently via parent PageShell */}
         <div className="space-y-4">
 
           <SectionCard title="Product Images" icon="🖼️">
             <ImageUploader imagePaths={imagePaths} onChange={setImagePaths} required />
+          </SectionCard>
+
+          {/* AI Generate */}
+          <SectionCard title="AI Generate" icon="✨">
+            <div className="flex gap-2">
+              <input
+                className="input flex-1 text-sm"
+                placeholder="e.g. used iPhone 14 Pro Max 256GB space black"
+                value={aiPrompt}
+                onChange={(e) => { setAiPrompt(e.target.value); setAiError('') }}
+                onKeyDown={(e) => e.key === 'Enter' && handleAiGenerate()}
+              />
+              <button
+                type="button"
+                onClick={handleAiGenerate}
+                disabled={aiLoading || !aiPrompt.trim()}
+                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold disabled:opacity-50 transition-colors flex items-center gap-2 shrink-0"
+              >
+                {aiLoading
+                  ? <><svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                    </svg>Generating...</>
+                  : '⚡ Generate'}
+              </button>
+            </div>
+            {aiError && <p className="text-xs text-red-400 mt-1">{aiError}</p>}
+            <p className="text-xs text-slate-500 mt-1">Title and description will be auto-filled below.</p>
           </SectionCard>
 
           <ConfigPanel title="Listing Details" icon="📝">
@@ -409,9 +451,11 @@ export default function AccountListings({ feature }) {
             </ConfigPanel>
           )}
 
-          {selectedAccountIds.length > 0 && (
+          {selectedAccountIds.length > 0 && imagePaths.length > 0 && (
             <div className="rounded-xl border border-blue-500/20 bg-blue-500/8 px-4 py-3 text-xs text-blue-300">
-              ℹ️ Listing will be posted on <strong className="text-blue-200">{selectedAccountIds.length} account{selectedAccountIds.length > 1 ? 's' : ''}</strong> — 1 post per account using <strong className="text-blue-200">{activeMode?.label}</strong> mode.
+              ℹ️ <strong className="text-blue-200">{imagePaths.length} listing{imagePaths.length > 1 ? 's' : ''}</strong> will be posted per account
+              {selectedAccountIds.length > 1 && <> on <strong className="text-blue-200">{selectedAccountIds.length} accounts</strong> = <strong className="text-blue-200">{imagePaths.length * selectedAccountIds.length}</strong> total posts</>}
+              {' '}— each with a <strong className="text-blue-200">different image</strong>, same title/price.
             </div>
           )}
 

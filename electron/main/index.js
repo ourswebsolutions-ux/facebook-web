@@ -4,9 +4,17 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const path = require('path')
 const fs   = require('fs')
 
+<<<<<<< HEAD
 const { spawn } = require('child_process')
 
 let backendProcess = null
+=======
+// ── Bypass system proxy for localhost/127.0.0.1 ──────────────────────────────
+// When user runs app behind a system-level proxy (VPN, SOCKS etc.),
+// Electron routes localhost requests through it — causing blank UI.
+// This forces direct connection for local addresses only.
+app.commandLine.appendSwitch('proxy-bypass-list', '<local>;localhost;127.0.0.1;::1')
+>>>>>>> 7cef7719ea71b8b631a60865e9cbbf72b2d5b384
 
 console.count("MAIN PROCESS LOADED");
 console.log("PID:", process.pid);
@@ -115,7 +123,7 @@ function createWindow() {
     minHeight: 680,
     frame: true,
     titleBarStyle: 'hidden',
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#0a0a0a',
 
     icon: iconPath,
 
