@@ -1,22 +1,8 @@
 import axios from 'axios'
 
 // ── Base URL management ──────────────────────────────────────────────────────
-<<<<<<< HEAD
 // Force empty base URL for development to use Vite proxy
 let baseUrl = 'http://127.0.0.1:8000'
-=======
-// Default production backend URL — user can override in Settings
-const DEFAULT_BACKEND_URL = 'https://pylister.axorawebsolutions.com'
-
-// On startup: load from localStorage, fallback to default production URL
-// If stored URL is the old wrong domain or empty, reset it to default
-const _stored = localStorage.getItem('fb_base_url') || ''
-const _isWrongUrl = _stored === '' || _stored.includes('outreach.axorawebsolutions.com') || _stored.includes('localhost')
-if (_isWrongUrl) {
-  localStorage.setItem('fb_base_url', DEFAULT_BACKEND_URL)
-}
-let baseUrl = (_isWrongUrl ? DEFAULT_BACKEND_URL : _stored).replace(/\/+$/, '')
->>>>>>> 7cef7719ea71b8b631a60865e9cbbf72b2d5b384
 
 export function getBaseUrl() {
   return baseUrl
