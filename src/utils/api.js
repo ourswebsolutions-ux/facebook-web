@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // ── Base URL management ──────────────────────────────────────────────────────
 // Default production backend URL — user can override in Settings
-const DEFAULT_BACKEND_URL = 'https://pylister.axorawebsolutions.com'
+const DEFAULT_BACKEND_URL = 'http://localhost:8000'
 
 // On startup: load from localStorage, fallback to default production URL
 // If stored URL is the old wrong domain or empty, reset it to default

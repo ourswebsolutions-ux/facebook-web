@@ -16,6 +16,7 @@ import api, { hasToken, clearToken } from './utils/api'
 // ── Main app shell (shown only when logged in) ────────────────────────────────
 function AppShell() {
   const activeTab = useAppStore((s) => s.activeTab)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   let content
   if (activeTab === 'dashboard')   content = <Dashboard />
@@ -29,9 +30,9 @@ function AppShell() {
     <>
       <GlobalTaskPoller />
       <div className="flex flex-col h-screen bg-surface overflow-hidden">
-        <TitleBar />
-        <div className="flex flex-1 min-h-0">
-          <Sidebar />
+        <TitleBar onMenuToggle={() => setSidebarOpen((v) => !v)} />
+        <div className="flex flex-1 min-h-0 relative">
+          <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
           <main className="flex-1 min-h-0 overflow-hidden bg-surface min-w-0">
             {content}
           </main>

@@ -367,54 +367,48 @@ export default function InboxView() {
               Read Facebook Marketplace messages and send AI-powered or manual replies in real-time.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" className="btn-secondary" onClick={loadMessages} disabled={loading}>
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            <button type="button" className="btn-secondary flex-1 sm:flex-none" onClick={loadMessages} disabled={loading}>
               {loading ? 'Loading…' : 'Refresh'}
             </button>
-            <button type="button" className="btn-primary" onClick={readInbox} disabled={taskBusy}>
+            <button type="button" className="btn-primary flex-1 sm:flex-none" onClick={readInbox} disabled={taskBusy}>
               {taskBusy ? 'Working…' : 'Read Inbox'}
             </button>
-            {/* <button type="button" className="btn-primary" onClick={autoReply} disabled={taskBusy}>
-              Auto Reply
-            </button> */}
           </div>
         </div>
 
         {/* Account & Filter Bar */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
             <span className="text-xs text-slate-400 uppercase tracking-wider whitespace-nowrap">Account</span>
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input
-                className="input pl-8 py-1.5 text-sm w-48"
+                className="input pl-8 py-1.5 text-sm w-full sm:w-48"
                 placeholder="Search accounts…"
                 value={searchAccount}
                 onChange={(e) => setSearchAccount(e.target.value)}
               />
             </div>
-            <div className="relative">
-              <select
-                className="input py-1.5 text-sm w-56"
-                value={selectedAccountId}
-                onChange={(e) => setSelectedAccountId(e.target.value)}
-                size={1}
-              >
-                <option value="">All accounts</option>
-                {accounts
-                  .filter((acc) => !searchAccount || (acc.email || acc.phone || '').toLowerCase().includes(searchAccount.toLowerCase()))
-                  .map((acc) => (
-                    <option key={acc.id} value={acc.id}>
-                      {acc.email || acc.phone} {acc.cookies ? '✓' : '⚠'}
-                    </option>
-                  ))}
-              </select>
-            </div>
+            <select
+              className="input py-1.5 text-sm w-full sm:w-56"
+              value={selectedAccountId}
+              onChange={(e) => setSelectedAccountId(e.target.value)}
+            >
+              <option value="">All accounts</option>
+              {accounts
+                .filter((acc) => !searchAccount || (acc.email || acc.phone || '').toLowerCase().includes(searchAccount.toLowerCase()))
+                .map((acc) => (
+                  <option key={acc.id} value={acc.id}>
+                    {acc.email || acc.phone} {acc.cookies ? '✓' : '⚠'}
+                  </option>
+                ))}
+            </select>
           </div>
-          <label className="flex items-center gap-2 text-sm text-slate-400">
-            <span className="text-xs uppercase tracking-wider">Status</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 uppercase tracking-wider">Status</span>
             <select
               className="input py-1.5 text-sm w-auto"
               value={filterStatus}
@@ -426,7 +420,7 @@ export default function InboxView() {
               <option value="failed">Failed</option>
               <option value="skipped">Skipped</option>
             </select>
-          </label>
+          </div>
         </div>
 
         {/* Error */}
@@ -448,7 +442,7 @@ export default function InboxView() {
         )}
 
         {/* Main Grid */}
-        <div className="grid lg:grid-cols-[1.4fr_0.6fr] gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_0.6fr] gap-4">
           {/* Messages List */}
           <div className="card overflow-hidden p-0">
             <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">

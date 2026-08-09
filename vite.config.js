@@ -9,27 +9,24 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  base: './',
-  build: {
-    outDir: 'dist',
-    emptyOutDir: true,
-  },
   server: {
     port: 5173,
-    strictPort: true,
     proxy: {
-      // Proxy API requests to the backend to avoid CORS in development
       '/api': {
-        target: 'https://pylister.axorawebsolutions.com',
+        target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
         ws: true,
       },
       '/health': {
-        target: 'https://pylister.axorawebsolutions.com',
+        target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
       },
     },
+  },
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
   },
 })

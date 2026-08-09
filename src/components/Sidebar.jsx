@@ -73,9 +73,14 @@ function sectionContainsTab(section, tabId) {
   return section.items.some((item) => item.id === tabId)
 }
 
-export default function Sidebar() {
+export default function Sidebar({ open, onClose }) {
   const activeTab = useAppStore((s) => s.activeTab)
   const setTab = useAppStore((s) => s.setActiveTab)
+
+  const handleTabClick = (id) => {
+    setTab(id)
+    onClose?.() // close sidebar on mobile after click
+  }
 
   const [openSections, setOpenSections] = useState(() => {
     const initial = {}
@@ -96,7 +101,33 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-60 flex-shrink-0 flex flex-col bg-black border-r border-white/5">
+    <>
+      {/* Mobile overlay */}
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`
+        fixed top-0 left-0 h-full z-50 w-60 flex flex-col bg-black border-r border-white/5
+        transform transition-transform duration-200 ease-out
+        lg:static lg:translate-x-0 lg:z-auto lg:flex-shrink-0
+        ${open ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+      {/* Close button — mobile only */}
+      <button
+        type="button"
+        onClick={onClose}
+        className="lg:hidden absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-white/10 hover:text-white transition-colors z-10"
+        title="Close menu"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
 
       {/* Branding header */}
       <div className="px-4 py-3 border-b border-white/5">
@@ -153,7 +184,7 @@ export default function Sidebar() {
                         <button
                           key={item.id}
                           type="button"
-                          onClick={() => setTab(item.id)}
+                          onClick={() => handleTabClick(item.id)}
                           title={item.label}
                           className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-lg text-sm font-semibold
                                      bg-accent-red text-white shadow shadow-red-900/50 transition-all duration-150"
@@ -169,7 +200,7 @@ export default function Sidebar() {
                       <button
                         key={item.id}
                         type="button"
-                        onClick={() => setTab(item.id)}
+                        onClick={() => handleTabClick(item.id)}
                         title={item.label}
                         className={`flex items-center gap-2 w-full text-left px-3 py-2 rounded-lg text-sm font-medium
                                    border bg-transparent text-slate-300
@@ -197,5 +228,6 @@ export default function Sidebar() {
         </div>
       </div>
     </aside>
+    </>
   )
 }
