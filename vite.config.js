@@ -12,7 +12,9 @@ export default defineConfig({
   },
 
   server: {
-    port: 5173,
+    port: 3001,
+    strictPort: false,
+    host: '127.0.0.1',
     proxy: {
       '/api': {
         target: 'https://vps.axorawebsolutions.com',
@@ -21,7 +23,7 @@ export default defineConfig({
         ws: true,
       },
       '/health': {
-        target: ' ',
+        target: 'https://vps.axorawebsolutions.com',
         changeOrigin: true,
         secure: false,
       },
