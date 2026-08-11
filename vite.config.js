@@ -4,11 +4,13 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
+
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
+
   server: {
     port: 5173,
     proxy: {
@@ -25,6 +27,13 @@ export default defineConfig({
       },
     },
   },
+
+  preview: {
+    host: '127.0.0.1',
+    port: 8119,
+    allowedHosts: ['buymest.com', 'www.buymest.com'],
+  },
+
   build: {
     outDir: 'dist',
     emptyOutDir: true,
