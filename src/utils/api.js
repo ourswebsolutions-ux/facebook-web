@@ -2,12 +2,14 @@ import axios from 'axios'
 
 // ── Base URL management ──────────────────────────────────────────────────────
 // Default production backend URL — user can override in Settings
-const DEFAULT_BACKEND_URL = 'http://localhost:8000'
+const DEFAULT_BACKEND_URL = 'https://vps.axorawebsolutions.com'
 
-// On startup: load from localStorage, fallback to default production URL
-// If stored URL is the old wrong domain or empty, reset it to default
 const _stored = localStorage.getItem('fb_base_url') || ''
-const _isWrongUrl = _stored === '' || _stored.includes('outreach.axorawebsolutions.com') || _stored.includes('localhost')
+const _isWrongUrl = _stored === '' 
+  || _stored.includes('outreach.axorawebsolutions.com')
+  || _stored.includes('pylister.axorawebsolutions.com')
+  || _stored.includes('localhost')
+  || _stored.includes('127.0.0.1')
 if (_isWrongUrl) {
   localStorage.setItem('fb_base_url', DEFAULT_BACKEND_URL)
 }
