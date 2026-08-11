@@ -16,7 +16,7 @@ export function useWebSocket() {
 
   // Calculate WebSocket URL from localStorage backend URL
   const getWebSocketUrl = useCallback(() => {
-    const stored = localStorage.getItem('fb_base_url') || 'http://localhost:8000'
+    const stored = localStorage.getItem('fb_base_url') || 'https://vps.axorawebsolutions.com'
     const wsUrl = stored
       .replace(/^https:\/\//, 'wss://')
       .replace(/^http:\/\//, 'ws://')
