@@ -143,6 +143,41 @@ export default function SettingsView() {
   const [authLoading, setAuthLoading] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
 
+  // Global proxy state (stored in localStorage)
+  const parseStoredProxy = () => {
+    const s = localStorage.getItem('global_proxy') || ''
+    if (!s) return { type: 'http', host: '', port: '', user: '', pass: '' }
+    try {
+      const url = new URL(s)
+      return { type: url.protocol.replace(':', ''), host: url.hostname, port: url.port, user: url.username, pass: url.password }
+    } catch { return { type: 'http', host: '', port: '', user: '', pass: '' } }
+  }
+  const pp = parseStoredProxy()
+  const [proxyType, setProxyType] = useState(pp.type)
+  const [proxyHost, setProxyHost] = useState(pp.host)
+  const [proxyPort, setProxyPort] = useState(pp.port)
+  const [proxyUser, setProxyUser] = useState(pp.user)
+  const [proxyPass, setProxyPass] = useState(pp.pass)
+  const [proxySaveState, setProxySaveState] = useState('')
+
+  const buildProxy = () => {
+    if (!proxyHost.trim() || !proxyPort.trim()) return ''
+    const creds = proxyUser.trim() ? `${proxyUser.trim()}:${proxyPass.trim()}@` : ''
+    return `${proxyType}://${creds}${proxyHost.trim()}:${proxyPort.trim()}`
+  }
+  const saveProxy = () => {
+    const str = buildProxy()
+    localStorage.setItem('global_proxy', str)
+    setProxySaveState('Saved ✓')
+    setTimeout(() => setProxySaveState(''), 2000)
+  }
+  const clearProxy = () => {
+    localStorage.removeItem('global_proxy')
+    setProxyHost(''); setProxyPort(''); setProxyUser(''); setProxyPass('')
+    setProxySaveState('Cleared ✓')
+    setTimeout(() => setProxySaveState(''), 2000)
+  }
+
   const update = (key, value) => setSettings({ ...settings, [key]: value })
 
   const saveBaseUrl = () => {
@@ -239,7 +274,54 @@ export default function SettingsView() {
           {saveState && <p className="text-sm text-emerald-400 font-medium">{saveState}</p>}
         </div>
 
-        {/* Automation Settings */}
+        {/* Global Proxy Settings */}
+        <div className="card space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center">
+              <svg className="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white">Global Proxy</h3>
+              <p className="text-xs text-slate-500">Residential proxy for Facebook automation (fixes server IP block)</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">Type</label>
+              <select className="input text-sm" value={proxyType} onChange={(e) => setProxyType(e.target.value)}>
+                <option value="http">HTTP</option>
+                <option value="https">HTTPS</option>
+                <option value="socks5">SOCKS5</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">Port</label>
+              <input className="input text-sm" type="text" placeholder="e.g. 7000" value={proxyPort} onChange={(e) => setProxyPort(e.target.value)} />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-slate-500 mb-1 block">Host / IP</label>
+            <input className="input" type="text" placeholder="e.g. gate.smartproxy.com" value={proxyHost} onChange={(e) => setProxyHost(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">Username</label>
+              <input className="input text-sm" type="text" placeholder="Proxy username" value={proxyUser} onChange={(e) => setProxyUser(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">Password</label>
+              <input className="input text-sm" type="password" placeholder="Proxy password" value={proxyPass} onChange={(e) => setProxyPass(e.target.value)} />
+            </div>
+          </div>
+          {buildProxy() && <p className="text-xs text-emerald-400 font-mono break-all">✓ {buildProxy()}</p>}
+          <div className="flex gap-3">
+            <button type="button" className="btn-primary flex-1" onClick={saveProxy}>Save Proxy</button>
+            <button type="button" className="btn-secondary" onClick={clearProxy}>Clear</button>
+          </div>
+          {proxySaveState && <p className="text-sm text-emerald-400 font-medium">{proxySaveState}</p>}
+        </div>
         <div className="card space-y-5">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center">
