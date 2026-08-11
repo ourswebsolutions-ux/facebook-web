@@ -474,7 +474,7 @@ export function ImageUploader({ imagePaths = [], onChange, required = false, max
       const form = new FormData()
       files.forEach((f) => form.append('files', f))
       const res = await fetch(
-        (localStorage.getItem('fb_base_url') || 'http://localhost:8000') + '/api/automation/upload-images',
+        (localStorage.getItem('fb_base_url') || 'https://vps.axorawebsolutions.com') + '/api/automation/upload-images',
         { method: 'POST', body: form }
       )
       if (!res.ok) {

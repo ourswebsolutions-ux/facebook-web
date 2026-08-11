@@ -21,7 +21,7 @@ export default defineConfig({
         ws: true,
       },
       '/health': {
-        target: 'https://vps.axorawebsolutions.com',
+        target: ' ',
         changeOrigin: true,
         secure: false,
       },
